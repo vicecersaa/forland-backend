@@ -1,20 +1,21 @@
-const validate = (schema) => {
-    return async (req, res, next) => {
-        try {
+import deleteUploadedFiles from "../utils/deleteUploadedFiles.js";
 
-            req.body = await schema.parseAsync(req.body);
+const validate = (schema) => (req, res, next) => {
 
-            next();
+    try {
 
-        } catch (error) {
+        req.body = schema.parse(req.body);
 
-            return res.status(400).json({
-                success: false,
-                message: error.errors?.[0]?.message || "Validation Error"
-            });
+        next();
 
-        }
-    };
+    } catch (error) {
+
+        deleteUploadedFiles(req.files);
+
+        next(error);
+
+    }
+
 };
 
 export default validate;

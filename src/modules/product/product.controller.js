@@ -1,30 +1,43 @@
-import categoryService from "./category.service.js";
+import productService from "./product.service.js";
 
 import asyncHandler from "../../utils/asyncHandler.js";
 import ApiResponse from "../../utils/ApiResponse.js";
+
 import deleteUploadedFiles from "../../utils/deleteUploadedFiles.js";
-import deleteFile from "../../utils/deleteFile.js";
 
 const create = asyncHandler(async (req, res) => {
 
+    const images =
+        req.files?.images?.map(
+            file => file.filename
+        ) ?? [];
+
+    const video =
+        req.files?.video?.[0]?.filename ?? "";
+
     try {
 
-        const image =
-            req.files?.image?.[0]?.filename || "";
-
         const result =
-            await categoryService.create({
+            await productService.create({
 
                 ...req.body,
-                image
+
+                images,
+
+                video
 
             });
 
         ApiResponse.success(
+
             res,
+
             result,
-            "Category created successfully",
+
+            "Product created successfully",
+
             201
+
         );
 
     } catch (error) {
@@ -39,68 +52,77 @@ const create = asyncHandler(async (req, res) => {
 
 const getAll = asyncHandler(async (req, res) => {
 
-    const result = await categoryService.getAll(req.query);
+    const result =
+        await productService.getAll(req.query);
 
     ApiResponse.success(
+
         res,
+
         result,
-        "Categories fetched successfully"
+
+        "Products fetched successfully"
+
     );
 
 });
 
 const getById = asyncHandler(async (req, res) => {
 
-    const result = await categoryService.getById(
-        req.params.id
-    );
+    const result =
+        await productService.getById(
+            req.params.id
+        );
 
     ApiResponse.success(
+
         res,
+
         result,
-        "Category fetched successfully"
+
+        "Product fetched successfully"
+
     );
 
 });
 
 const update = asyncHandler(async (req, res) => {
 
-    const newImage =
-        req.files?.image?.[0]?.filename;
-        
+    const images =
+        req.files?.images?.map(
+            file => file.filename
+        ) ?? [];
+
+    const video =
+        req.files?.video?.[0]?.filename ?? null;
+
     try {
 
         const result =
-            await categoryService.update(
+            await productService.update(
 
                 req.params.id,
 
                 {
+
                     ...req.body,
-                    ...(newImage && {
-                        image: newImage
-                    })
+
+                    images,
+
+                    video
 
                 }
 
             );
 
-        if (
-            newImage &&
-            result.oldImage
-        ) {
-
-            deleteFile(
-                "categories",
-                result.oldImage
-            );
-
-        }
-
         ApiResponse.success(
+
             res,
-            result.category,
-            "Category updated successfully"
+
+            result,
+
+            "Product updated successfully"
+
         );
 
     } catch (error) {
@@ -115,37 +137,54 @@ const update = asyncHandler(async (req, res) => {
 
 const remove = asyncHandler(async (req, res) => {
 
-    const result = await categoryService.remove(
-        req.params.id
-    );
+    const result =
+        await productService.remove(
+            req.params.id
+        );
 
     ApiResponse.success(
+
         res,
+
         result,
-        "Category deleted successfully"
+
+        "Product deleted successfully"
+
     );
 
 });
 
 const restore = asyncHandler(async (req, res) => {
 
-    const result = await categoryService.restore(
-        req.params.id
-    );
+    const result =
+        await productService.restore(
+            req.params.id
+        );
 
     ApiResponse.success(
+
         res,
+
         result,
-        "Category restored successfully"
+
+        "Product restored successfully"
+
     );
 
 });
 
 export default {
+
     create,
+
     getAll,
+
     getById,
+
     update,
+
     remove,
+
     restore
+
 };

@@ -1,7 +1,9 @@
-import slugify from "slugify";
-
+import makeSlug from "../../utils/slug.js";
 import Category from "./category.model.js";
 import ApiError from "../../utils/ApiError.js";
+import queryBuilder from "../../utils/queryBuilder.js";
+import paginate from "../../utils/paginate.js";
+import findDocumentOrThrow from "../../utils/findDocumentOrThrow.js";
 
 const create = async (payload) => {
 
@@ -13,10 +15,7 @@ const create = async (payload) => {
         throw new ApiError(409, "Category already exists");
     }
 
-    const slug = slugify(payload.name, {
-        lower: true,
-        strict: true
-    });
+    const slug = makeSlug(payload.name);
 
     const category = await Category.create({
         ...payload,
@@ -28,45 +27,27 @@ const create = async (payload) => {
 
 const getAll = async (query) => {
 
-    const page = Number(query.page) || 1;
-    const limit = Number(query.limit) || 10;
+    const {
+        page,
+        limit,
+        skip,
+        filter,
+        sort
+    } = queryBuilder(query, {
 
-    const skip = (page - 1) * limit;
+        searchableFields: [
+            "name",
+            "description"
+        ],
 
-    const filter = {};
-
-    if (query.search) {
-        filter.name = {
-            $regex: query.search,
-            $options: "i"
-        };
-    }
-
-    if (query.isActive !== undefined) {
-        filter.isActive = query.isActive === "true";
-    }
-
-    const sort = {};
-
-    if (query.sort) {
-
-        if (query.sort.startsWith("-")) {
-
-            sort[query.sort.substring(1)] = -1;
-
-        } else {
-
-            sort[query.sort] = 1;
-
+        defaultSort: {
+            sortOrder: 1
         }
 
-    } else {
+    });
 
-        sort.sortOrder = 1;
-
-    }
-
-    const totalItems = await Category.countDocuments(filter);
+    const totalItems =
+        await Category.countDocuments(filter);
 
     const items = await Category.find(filter)
         .sort(sort)
@@ -77,21 +58,15 @@ const getAll = async (query) => {
 
         items,
 
-        pagination: {
+        pagination: paginate({
 
             page,
 
             limit,
 
-            totalItems,
+            totalItems
 
-            totalPages: Math.ceil(totalItems / limit),
-
-            hasNextPage: page * limit < totalItems,
-
-            hasPrevPage: page > 1
-
-        }
+        })
 
     };
 
@@ -99,11 +74,93 @@ const getAll = async (query) => {
 
 const getById = async (id) => {
 
-    const category = await Category.findById(id);
+    const category = await findDocumentOrThrow(
+    Category,
+    id,
+    "Category not found"
+);
 
-    if (!category) {
-        throw new ApiError(404, "Category not found");
+    return category;
+
+};
+
+const update = async (id, payload) => {
+
+    const category = await findDocumentOrThrow(
+        Category,
+        id,
+        "Category not found"
+    );
+
+    // Simpan gambar lama DULU
+    const oldImage = category.image;
+
+    // kalau name diubah
+    if (
+        payload.name &&
+        payload.name !== category.name
+    ) {
+
+        const exists = await Category.findOne({
+            name: payload.name
+        });
+
+        if (exists) {
+            throw new ApiError(
+                409,
+                "Category already exists"
+            );
+        }
+
+        payload.slug = makeSlug(payload.name);
     }
+
+    Object.assign(category, payload);
+
+    await category.save();
+
+    return {
+        category,
+        oldImage
+    };
+
+};
+
+const remove = async (id) => {
+
+    const category = await findDocumentOrThrow(
+    Category,
+    id,
+    "Category not found"
+);
+
+    if (!category.isActive) {
+        throw new ApiError(400, "Category already deleted");
+    }
+
+    category.isActive = false;
+
+    await category.save();
+
+    return category;
+
+};
+
+const restore = async (id) => {
+
+    const category = await findDocumentOrThrow(
+    Category,
+    id,
+    "Category not found"
+);
+
+    if (category.isActive) {
+        throw new ApiError(400, "Category is already active");
+    }
+
+    category.isActive = true;
+
+    await category.save();
 
     return category;
 
@@ -112,5 +169,8 @@ const getById = async (id) => {
 export default {
     create,
     getAll,
-    getById
+    getById,
+    update,
+    remove,
+    restore
 };

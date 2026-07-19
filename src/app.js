@@ -3,8 +3,16 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import errorMiddleware from "./middleware/error.middleware.js";
 import routes from "./routes/index.js";
+import path from "path";
 
 const app = express();
+
+app.use(
+    "/uploads",
+    express.static(
+        path.join(process.cwd(), "uploads")
+    )
+);
 
 app.use(cors());
 app.use(express.json());

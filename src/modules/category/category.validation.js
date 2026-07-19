@@ -6,23 +6,20 @@ export const createCategorySchema = z.object({
             required_error: "Category name is required"
         })
         .trim()
-        .min(1, "Category name is required")
-        .max(100, "Category name cannot exceed 100 characters"),
+        .min(1)
+        .max(100),
 
     description: z
         .string()
         .trim()
-        .max(500, "Description cannot exceed 500 characters")
+        .max(500)
         .optional()
         .default(""),
 
-    image: z
-        .string()
-        .trim()
-        .optional()
-        .default(""),
+   
 
     sortOrder: z
+        .coerce
         .number()
         .int()
         .min(0)
@@ -30,6 +27,7 @@ export const createCategorySchema = z.object({
         .default(0),
 
     isActive: z
+        .coerce
         .boolean()
         .optional()
         .default(true)
