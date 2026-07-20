@@ -114,10 +114,65 @@ const upload = (configs) => {
    const multerUpload = multer({
 
     storage,
+
     fileFilter,
+
     limits
 
 }).fields(fields);
+
+return (req, res, next) => {
+
+    multerUpload(req, res, (err) => {
+
+        if (err) {
+
+            deleteUploadedFiles(req.files);
+
+            return next(err);
+
+        }
+
+        try {
+
+            validateUploadedFiles(
+                req.files ?? {},
+                configs
+            );
+
+        } catch (error) {
+
+            deleteUploadedFiles(req.files);
+
+            return next(error);
+
+        }
+
+        next();
+
+    });
+
+};
+
+return (req, res, next) => {
+
+    multerUpload(req, res, (err) => {
+
+        console.log("FIELDS CONFIG:", fields);
+
+        if (err) {
+
+            console.log(err);
+
+            return next(err);
+
+        }
+
+        next();
+
+    });
+
+};
 
 return (req, res, next) => {
 

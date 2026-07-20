@@ -135,6 +135,94 @@ const update = asyncHandler(async (req, res) => {
 
 });
 
+const removeImage = asyncHandler(async (req, res) => {
+
+    const result =
+        await productService.removeImage(
+
+            req.params.id,
+
+            req.params.image
+
+        );
+
+    ApiResponse.success(
+
+        res,
+
+        result,
+
+        "Image deleted successfully"
+
+    );
+
+});
+
+const replaceImage = asyncHandler(async (req, res) => {
+
+    const image =
+        req.files?.images?.[0];
+
+    if (!image) {
+
+        throw new Error("Image is required");
+
+    }
+
+    try {
+
+        const result =
+            await productService.replaceImage(
+
+                req.params.id,
+
+                req.params.image,
+
+                image.filename
+
+            );
+
+        ApiResponse.success(
+
+            res,
+
+            result,
+
+            "Image replaced successfully"
+
+        );
+
+    } catch (error) {
+
+        deleteUploadedFiles(req.files);
+
+        throw error;
+
+    }
+
+});
+
+const removeVideo = asyncHandler(async (req, res) => {
+
+    const result =
+        await productService.removeVideo(
+
+            req.params.id
+
+        );
+
+    ApiResponse.success(
+
+        res,
+
+        result,
+
+        "Video deleted successfully"
+
+    );
+
+});
+
 const remove = asyncHandler(async (req, res) => {
 
     const result =
@@ -173,6 +261,26 @@ const restore = asyncHandler(async (req, res) => {
 
 });
 
+const permanentDelete = asyncHandler(async (req, res) => {
+
+    await productService.permanentDelete(
+
+        req.params.id
+
+    );
+
+    ApiResponse.success(
+
+        res,
+
+        null,
+
+        "Product permanently deleted"
+
+    );
+
+});
+
 export default {
 
     create,
@@ -183,8 +291,15 @@ export default {
 
     update,
 
+    removeImage,
+
+    replaceImage,
+
+    removeVideo,
+
     remove,
 
-    restore
+    restore,
 
+    permanentDelete
 };

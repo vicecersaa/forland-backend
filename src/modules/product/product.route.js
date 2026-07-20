@@ -117,11 +117,32 @@ router.put(
 
 );
 
-router.delete(
-    "/:id",
+router.patch(
+
+    "/:id/images/:image",
+
     authMiddleware,
+
     authorize("admin"),
-    productController.remove
+
+    upload([
+
+        {
+
+            field: "images",
+
+            folder: "products/images",
+
+            maxCount: 1,
+
+            type: "image"
+
+        }
+
+    ]),
+
+    productController.replaceImage
+
 );
 
 router.patch(
@@ -130,5 +151,52 @@ router.patch(
     authorize("admin"),
     productController.restore
 );
+
+router.delete(
+
+    "/:id/images/:image",
+
+    authMiddleware,
+
+    authorize("admin"),
+
+    productController.removeImage
+
+);
+
+router.delete(
+
+    "/:id/video",
+
+    authMiddleware,
+
+    authorize("admin"),
+
+    productController.removeVideo
+
+);
+
+router.delete(
+
+    "/:id/permanent",
+
+    authMiddleware,
+
+    authorize("admin"),
+
+    productController.permanentDelete
+
+);
+
+router.delete(
+    "/:id",
+    authMiddleware,
+    authorize("admin"),
+    productController.remove
+);
+
+
+
+
 
 export default router;

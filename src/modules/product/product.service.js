@@ -6,6 +6,8 @@ import findDocumentOrThrow from "../../utils/findDocumentOrThrow.js";
 import queryBuilder from "../../utils/queryBuilder.js";
 import paginate from "../../utils/paginate.js";
 import Category from "../category/category.model.js";
+import deleteFile from "../../utils/deleteFile.js";
+
 
 const calculateSummary = (product) => {
 
@@ -224,30 +226,33 @@ const getById = async (id) => {
 
 const update = async (id, payload) => {
 
-    const product =
-        await findDocumentOrThrow(
+    const product = await findDocumentOrThrow(
 
-            Product,
+        Product,
 
-            id,
+        id,
 
-            "Product not found"
+        "Product not found"
 
-        );
+    );
 
-    // ==========================
-    // Cek duplicate name
-    // ==========================
+    const uploadedImages = payload.images ?? [];
+    const uploadedVideo = payload.video ?? null;
 
-    if (
+    try {
 
-        payload.name &&
-        payload.name !== product.name
+        // ==========================
+        // Duplicate Name
+        // ==========================
 
-    ) {
+        if (
 
-        const exists =
-            await Product.findOne({
+            payload.name &&
+            payload.name !== product.name
+
+        ) {
+
+            const exists = await Product.findOne({
 
                 name: payload.name,
 
@@ -255,62 +260,301 @@ const update = async (id, payload) => {
 
             });
 
-        if (exists) {
+            if (exists) {
 
-            throw new ApiError(
+                throw new ApiError(
 
-                409,
+                    409,
 
-                "Product already exists"
+                    "Product already exists"
+
+                );
+
+            }
+
+            payload.slug = makeSlug(payload.name);
+
+        }
+
+        // ==========================
+        // Category
+        // ==========================
+
+        if (payload.category) {
+
+            const category =
+                await findOrCreateCategory(
+                    payload.category
+                );
+
+            payload.category =
+                category._id;
+
+        }
+
+        // ==========================
+        // Append Images
+        // ==========================
+
+        if (uploadedImages.length > 0) {
+
+            payload.images = [
+
+                ...product.images,
+
+                ...uploadedImages
+
+            ];
+
+        } else {
+
+            delete payload.images;
+
+        }
+
+        // ==========================
+        // Replace Video
+        // ==========================
+
+        if (uploadedVideo) {
+
+            if (product.video) {
+
+                deleteFile(
+
+                    "products/videos",
+
+                    product.video
+
+                );
+
+            }
+
+            payload.video = uploadedVideo;
+
+        } else {
+
+            delete payload.video;
+
+        }
+
+        // ==========================
+        // Assign
+        // ==========================
+
+        Object.assign(
+
+            product,
+
+            payload
+
+        );
+
+        // ==========================
+        // Recalculate Summary
+        // ==========================
+
+        Object.assign(
+
+            product,
+
+            calculateSummary(product)
+
+        );
+
+        await product.save();
+
+        await product.populate("category");
+
+        return product;
+
+    } catch (error) {
+
+        // Rollback image baru
+
+        uploadedImages.forEach(image => {
+
+            deleteFile(
+
+                "products/images",
+
+                image
+
+            );
+
+        });
+
+        // Rollback video baru
+
+        if (uploadedVideo) {
+
+            deleteFile(
+
+                "products/videos",
+
+                uploadedVideo
 
             );
 
         }
 
-        payload.slug =
-            makeSlug(payload.name);
+        throw error;
 
     }
 
-    // ==========================
-    // Update Category
-    // ==========================
+};
 
-    if (payload.category) {
+const removeImage = async (
 
-        const category =
-            await findOrCreateCategory(
-                payload.category
-            );
+    productId,
 
-        payload.category =
-            category._id;
+    imageName
+
+) => {
+
+    const product =
+        await findDocumentOrThrow(
+
+            Product,
+
+            productId,
+
+            "Product not found"
+
+        );
+
+    if (
+
+        !product.images.includes(imageName)
+
+    ) {
+
+        throw new ApiError(
+
+            404,
+
+            "Image not found"
+
+        );
 
     }
 
-    // ==========================
-    // Assign Data
-    // ==========================
+    product.images =
+        product.images.filter(
 
-    Object.assign(
+            image => image !== imageName
 
-        product,
+        );
 
-        payload
+    deleteFile(
+
+        "products/images",
+
+        imageName
+
+    );
+
+    await product.save();
+
+    return product;
+
+};
+
+const replaceImage = async (
+
+    productId,
+
+    oldImage,
+
+    newImage
+
+) => {
+
+    const product =
+        await findDocumentOrThrow(
+
+            Product,
+
+            productId,
+
+            "Product not found"
+
+        );
+
+    const index =
+        product.images.indexOf(oldImage);
+
+    if (index === -1) {
+
+        deleteFile(
+
+            "products/images",
+
+            newImage
+
+        );
+
+        throw new ApiError(
+
+            404,
+
+            "Image not found"
+
+        );
+
+    }
+
+    deleteFile(
+
+        "products/images",
+
+        oldImage
 
     );
 
-    // ==========================
-    // Recalculate Summary
-    // ==========================
+    product.images[index] =
+        newImage;
 
-    Object.assign(
+    await product.save();
 
-        product,
+    return product;
 
-        calculateSummary(product)
+};
+
+const removeVideo = async (productId) => {
+
+    const product =
+        await findDocumentOrThrow(
+
+            Product,
+
+            productId,
+
+            "Product not found"
+
+        );
+
+    if (!product.video) {
+
+        throw new ApiError(
+
+            404,
+
+            "Video not found"
+
+        );
+
+    }
+
+    deleteFile(
+
+        "products/videos",
+
+        product.video
 
     );
+
+    product.video = "";
 
     await product.save();
 
@@ -384,6 +628,50 @@ const restore = async (id) => {
 
 };
 
+const permanentDelete = async (id) => {
+
+    const product = await findDocumentOrThrow(
+
+        Product,
+
+        id,
+
+        "Product not found"
+
+    );
+
+    // Hapus semua gambar
+    for (const image of product.images) {
+
+        deleteFile(
+
+            "products/images",
+
+            image
+
+        );
+
+    }
+
+    // Hapus video
+    if (product.video) {
+
+        deleteFile(
+
+            "products/videos",
+
+            product.video
+
+        );
+
+    }
+
+    await Product.findByIdAndDelete(id);
+
+    return null;
+
+};
+
 export default {
 
     create,
@@ -394,8 +682,16 @@ export default {
 
     update,
 
+    removeImage,
+
+    replaceImage,
+
+    removeVideo,
+
     remove,
 
-    restore
+    restore,
+    
+    permanentDelete
 
 };
