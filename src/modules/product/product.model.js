@@ -184,14 +184,20 @@ const productSchema = new mongoose.Schema(
 
         },
 
-        images: {
+        images: [{
 
-            type: [String],
+            type: String
 
-            default: []
+        }],
+
+        thumbnail: {
+
+            type: String,
+
+            default: ""
 
         },
-
+        
         video: {
 
             type: String,

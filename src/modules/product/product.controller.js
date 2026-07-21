@@ -202,6 +202,74 @@ const replaceImage = asyncHandler(async (req, res) => {
 
 });
 
+const setThumbnail = asyncHandler(async (req, res) => {
+
+    const result =
+        await productService.setThumbnail(
+
+            req.params.id,
+
+            req.params.image
+
+        );
+
+    ApiResponse.success(
+
+        res,
+
+        result,
+
+        "Thumbnail updated successfully"
+
+    );
+
+});
+
+const reorderImages = asyncHandler(async (req, res) => {
+
+    const result =
+        await productService.reorderImages(
+
+            req.params.id,
+
+            req.body.images
+
+        );
+
+    ApiResponse.success(
+
+        res,
+
+        result,
+
+        "Images reordered successfully"
+
+    );
+
+});
+
+const bulkDelete = asyncHandler(async (req, res) => {
+
+    const result =
+
+        await productService.bulkDelete(
+
+            req.body.ids
+
+        );
+
+    ApiResponse.success(
+
+        res,
+
+        result,
+
+        "Products deleted successfully"
+
+    );
+
+});
+
 const removeVideo = asyncHandler(async (req, res) => {
 
     const result =
@@ -292,6 +360,12 @@ export default {
     update,
 
     removeImage,
+
+    setThumbnail,
+
+    reorderImages,
+
+    bulkDelete,
 
     replaceImage,
 

@@ -136,6 +136,9 @@ const create = async (payload) => {
 
             slug,
 
+            thumbnail:
+                payload.images?.[0] ?? "",
+
             ...summary
 
         });
@@ -177,6 +180,21 @@ const getAll = async (query) => {
         }
 
     );
+
+    // ==========================
+    // Active / Trash Filter
+    // ==========================
+
+    if (query.isActive !== undefined) {
+
+        filter.isActive = query.isActive === "true";
+
+    } else {
+
+        // Default hanya tampilkan produk aktif
+        filter.isActive = true;
+
+    }
 
     const totalItems =
         await Product.countDocuments(filter);
@@ -298,19 +316,25 @@ const update = async (id, payload) => {
 
         if (uploadedImages.length > 0) {
 
-            payload.images = [
+    payload.images = [
 
-                ...product.images,
+        ...product.images,
 
-                ...uploadedImages
+        ...uploadedImages
 
-            ];
+    ];
 
-        } else {
+    if (!product.thumbnail) {
 
-            delete payload.images;
+        payload.thumbnail = uploadedImages[0];
 
-        }
+    }
+
+} else {
+
+    delete payload.images;
+
+}
 
         // ==========================
         // Replace Video
@@ -440,23 +464,30 @@ const removeImage = async (
     }
 
     product.images =
-        product.images.filter(
+    product.images.filter(
 
-            image => image !== imageName
-
-        );
-
-    deleteFile(
-
-        "products/images",
-
-        imageName
+        image => image !== imageName
 
     );
 
-    await product.save();
+if (product.thumbnail === imageName) {
 
-    return product;
+    product.thumbnail =
+        product.images[0] ?? "";
+
+}
+
+deleteFile(
+
+    "products/images",
+
+    imageName
+
+);
+
+await product.save();
+
+return product;
 
 };
 
@@ -504,6 +535,16 @@ const replaceImage = async (
 
     }
 
+    product.images[index] = newImage;
+
+    if (product.thumbnail === oldImage) {
+
+        product.thumbnail = newImage;
+
+    }
+
+    await product.save();
+
     deleteFile(
 
         "products/images",
@@ -512,12 +553,167 @@ const replaceImage = async (
 
     );
 
-    product.images[index] =
-        newImage;
+    return product;
+
+};
+
+const setThumbnail = async (
+
+    productId,
+
+    imageName
+
+) => {
+
+    const product =
+        await findDocumentOrThrow(
+
+            Product,
+
+            productId,
+
+            "Product not found"
+
+        );
+
+    if (
+
+        !product.images.includes(imageName)
+
+    ) {
+
+        throw new ApiError(
+
+            404,
+
+            "Image not found"
+
+        );
+
+    }
+
+    product.thumbnail = imageName;
 
     await product.save();
 
     return product;
+
+};
+
+const reorderImages = async (
+
+    productId,
+
+    images
+
+) => {
+
+    const product =
+        await findDocumentOrThrow(
+
+            Product,
+
+            productId,
+
+            "Product not found"
+
+        );
+
+    // jumlah gambar harus sama
+    if (
+
+        images.length !== product.images.length
+
+    ) {
+
+        throw new ApiError(
+
+            400,
+
+            "Invalid image list"
+
+        );
+
+    }
+
+    // semua gambar harus ada
+    const isValid = images.every(
+
+        image => product.images.includes(image)
+
+    );
+
+    if (!isValid) {
+
+        throw new ApiError(
+
+            400,
+
+            "Invalid image list"
+
+        );
+
+    }
+
+    product.images = images;
+
+    // kalau thumbnail hilang (harusnya nggak mungkin)
+    if (
+
+        product.thumbnail &&
+        !images.includes(product.thumbnail)
+
+    ) {
+
+        product.thumbnail = images[0] ?? "";
+
+    }
+
+    await product.save();
+
+    return product;
+
+};
+
+const bulkDelete = async (ids) => {
+
+    if (!Array.isArray(ids) || ids.length === 0) {
+
+        throw new ApiError(
+
+            400,
+
+            "Product ids are required"
+
+        );
+
+    }
+
+    await Product.updateMany(
+
+        {
+
+            _id: {
+
+                $in: ids
+
+            }
+
+        },
+
+        {
+
+            isActive: false
+
+        }
+
+    );
+
+    return {
+
+        deleted: ids.length
+
+    };
 
 };
 
@@ -682,9 +878,15 @@ export default {
 
     update,
 
+    bulkDelete, 
+
     removeImage,
 
     replaceImage,
+
+    setThumbnail,
+
+    reorderImages,
 
     removeVideo,
 

@@ -119,6 +119,18 @@ router.put(
 
 router.patch(
 
+    "/:id/images/reorder",
+
+    authMiddleware,
+
+    authorize("admin"),
+
+    productController.reorderImages
+
+);
+
+router.patch(
+
     "/:id/images/:image",
 
     authMiddleware,
@@ -146,10 +158,27 @@ router.patch(
 );
 
 router.patch(
-    "/:id/restore",
+
+    "/:id/thumbnail/:image",
+
     authMiddleware,
+
     authorize("admin"),
+
+    productController.setThumbnail
+
+);
+
+router.patch(
+
+    "/:id/restore",
+
+    authMiddleware,
+
+    authorize("admin"),
+
     productController.restore
+
 );
 
 router.delete(
@@ -185,6 +214,18 @@ router.delete(
     authorize("admin"),
 
     productController.permanentDelete
+
+);
+
+router.delete(
+
+    "/",
+
+    authMiddleware,
+
+    authorize("admin"),
+
+    productController.bulkDelete
 
 );
 
