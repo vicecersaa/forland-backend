@@ -12,4 +12,8 @@ router.post("/admin/login", authController.adminLogin);
 
 router.get("/me", authMiddleware, authController.me);
 
+router.post("/forgot-password", authController.forgotPassword);
+
+router.post("/reset-password/:token", authController.resetPassword);
+
 export default router;

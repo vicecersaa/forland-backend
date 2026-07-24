@@ -59,9 +59,53 @@ const me = asyncHandler(async (req, res) => {
 
 });
 
+const forgotPassword = asyncHandler(
+async(req,res)=>{
+
+
+    const result =
+        await authService.forgotPassword(
+            req.body
+        );
+
+
+    ApiResponse.success(
+        res,
+        result,
+        "Forgot password success"
+    );
+
+
+});
+
+const resetPassword = asyncHandler(
+async(req,res)=>{
+
+
+    const result =
+        await authService.resetPassword(
+
+            req.params.token,
+
+            req.body.password
+
+        );
+
+
+    ApiResponse.success(
+        res,
+        result,
+        "Reset password success"
+    );
+
+
+});
+
 export default {
     register,
     customerLogin,
     adminLogin,
-    me
+    me,
+    forgotPassword,
+    resetPassword
 };

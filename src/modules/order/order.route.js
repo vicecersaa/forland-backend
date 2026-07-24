@@ -8,7 +8,13 @@ import validate from "../../middleware/validate.middleware.js";
 
 import {
 
-    createOrderSchema
+    createOrderSchema,
+
+    updateOrderStatusSchema,
+
+    updatePaymentStatusSchema,
+
+    updateShippingStatusSchema
 
 } from "./order.validation.js";
 
@@ -25,6 +31,84 @@ router.post(
     validate(createOrderSchema),
 
     orderController.create
+
+);
+
+router.get(
+
+    "/",
+
+    authMiddleware,
+
+    authorize("admin"),
+
+    orderController.getAll
+
+);
+
+router.get(
+
+    "/:id",
+
+    authMiddleware,
+
+    authorize("admin"),
+
+    orderController.getById
+
+);
+
+router.patch(
+
+    "/:id/status",
+
+    authMiddleware,
+
+    authorize("admin"),
+
+    validate(updateOrderStatusSchema),
+
+    orderController.updateStatus
+
+);
+
+router.patch(
+
+    "/:id/payment",
+
+    authMiddleware,
+
+    authorize("admin"),
+
+    validate(updatePaymentStatusSchema),
+
+    orderController.updatePaymentStatus
+
+);
+
+router.patch(
+
+    "/:id/shipping",
+
+    authMiddleware,
+
+    authorize("admin"),
+
+    validate(updateShippingStatusSchema),
+
+    orderController.updateShippingStatus
+
+);
+
+router.patch(
+
+    "/:id/cancel",
+
+    authMiddleware,
+
+    authorize("admin"),
+
+    orderController.cancel
 
 );
 

@@ -4,29 +4,123 @@ import asyncHandler from "../../utils/asyncHandler.js";
 import ApiResponse from "../../utils/ApiResponse.js";
 
 import deleteUploadedFiles from "../../utils/deleteUploadedFiles.js";
+import uploadToR2 from "../../utils/uploadToR2.js";
+import deleteFromR2 from "../../utils/deleteFromR2.js";
 
-const create = asyncHandler(async (req, res) => {
 
-    const images =
-        req.files?.images?.map(
-            file => file.filename
-        ) ?? [];
+const uploadFilesToR2 = async (files = {}) => {
 
-    const video =
-        req.files?.video?.[0]?.filename ?? "";
+    const uploaded = {
+
+        images: [],
+        imageKeys: [],
+
+        video: "",
+        videoKey: null
+
+    };
+
+
+    // =====================
+    // IMAGES
+    // =====================
+
+    if (files.images) {
+
+        for (const file of files.images) {
+
+            const result =
+                await uploadToR2(
+                    file.buffer,
+                    file.originalname,
+                    file.mimetype,
+                    "products/images"
+                );
+
+
+            uploaded.images.push(
+                result.url
+            );
+
+
+            uploaded.imageKeys.push(
+                result.key
+            );
+
+        }
+
+    }
+
+
+    // =====================
+    // VIDEO
+    // =====================
+
+    if (files.video?.[0]) {
+
+        const file =
+            files.video[0];
+
+
+        const result =
+            await uploadToR2(
+                file.buffer,
+                file.originalname,
+                file.mimetype,
+                "products/videos"
+            );
+
+
+        uploaded.video =
+            result.url;
+
+
+        uploaded.videoKey =
+            result.key;
+
+    }
+
+
+    return uploaded;
+
+};
+
+
+
+
+// =====================
+// CREATE
+// =====================
+
+const create = asyncHandler(async (req,res)=>{
+
+    let uploaded = null;
+
 
     try {
+
+
+        uploaded =
+            await uploadFilesToR2(
+                req.files
+            );
+
+
 
         const result =
             await productService.create({
 
                 ...req.body,
 
-                images,
+                images:
+                    uploaded.images,
 
-                video
+                video:
+                    uploaded.video
 
             });
+
+
 
         ApiResponse.success(
 
@@ -40,20 +134,53 @@ const create = asyncHandler(async (req, res) => {
 
         );
 
-    } catch (error) {
 
-        deleteUploadedFiles(req.files);
+    } catch(error){
+
+
+        if(uploaded){
+
+            for(const key of uploaded.imageKeys){
+
+                await deleteFromR2(key);
+
+            }
+
+
+            if(uploaded.videoKey){
+
+                await deleteFromR2(
+                    uploaded.videoKey
+                );
+
+            }
+
+        }
+
 
         throw error;
 
+
     }
+
 
 });
 
-const getAll = asyncHandler(async (req, res) => {
+
+
+
+// =====================
+// GET ALL ADMIN
+// =====================
+
+const getAll = asyncHandler(async(req,res)=>{
+
 
     const result =
-        await productService.getAll(req.query);
+        await productService.getAll(
+            req.query
+        );
+
 
     ApiResponse.success(
 
@@ -65,14 +192,24 @@ const getAll = asyncHandler(async (req, res) => {
 
     );
 
+
 });
 
-const getById = asyncHandler(async (req, res) => {
+
+
+
+// =====================
+// GET BY ID
+// =====================
+
+const getById = asyncHandler(async(req,res)=>{
+
 
     const result =
         await productService.getById(
             req.params.id
         );
+
 
     ApiResponse.success(
 
@@ -84,19 +221,81 @@ const getById = asyncHandler(async (req, res) => {
 
     );
 
+
 });
 
-const update = asyncHandler(async (req, res) => {
 
-    const images =
-        req.files?.images?.map(
-            file => file.filename
-        ) ?? [];
 
-    const video =
-        req.files?.video?.[0]?.filename ?? null;
+
+// =====================
+// PUBLIC
+// =====================
+
+const getPublic = asyncHandler(async(req,res)=>{
+
+
+    const result =
+        await productService.getPublic(
+            req.query
+        );
+
+
+    ApiResponse.success(
+
+        res,
+
+        result,
+
+        "Products fetched successfully"
+
+    );
+
+
+});
+
+
+
+const getPublicBySlug = asyncHandler(async(req,res)=>{
+
+
+    const result =
+        await productService.getPublicBySlug(
+            req.params.slug
+        );
+
+
+    ApiResponse.success(
+
+        res,
+
+        result,
+
+        "Product fetched successfully"
+
+    );
+
+
+});
+
+
+
+
+// =====================
+// UPDATE
+// =====================
+
+const update = asyncHandler(async(req,res)=>{
+
 
     try {
+
+
+        const uploaded =
+            await uploadFilesToR2(
+                req.files
+            );
+
+
 
         const result =
             await productService.update(
@@ -107,13 +306,28 @@ const update = asyncHandler(async (req, res) => {
 
                     ...req.body,
 
-                    images,
 
-                    video
+                    ...(uploaded.images.length > 0 && {
+
+                        images:
+                            uploaded.images
+
+                    }),
+
+
+
+                    ...(uploaded.video && {
+
+                        video:
+                            uploaded.video
+
+                    })
 
                 }
 
             );
+
+
 
         ApiResponse.success(
 
@@ -125,17 +339,32 @@ const update = asyncHandler(async (req, res) => {
 
         );
 
-    } catch (error) {
 
-        deleteUploadedFiles(req.files);
+    } catch(error){
+
+
+        await deleteUploadedFiles(
+            req.files
+        );
+
 
         throw error;
 
+
     }
+
 
 });
 
-const removeImage = asyncHandler(async (req, res) => {
+
+
+
+// =====================
+// DELETE IMAGE
+// =====================
+
+const removeImage = asyncHandler(async(req,res)=>{
+
 
     const result =
         await productService.removeImage(
@@ -145,6 +374,7 @@ const removeImage = asyncHandler(async (req, res) => {
             req.params.image
 
         );
+
 
     ApiResponse.success(
 
@@ -156,53 +386,83 @@ const removeImage = asyncHandler(async (req, res) => {
 
     );
 
+
 });
 
-const replaceImage = asyncHandler(async (req, res) => {
+
+
+
+// =====================
+// REPLACE IMAGE
+// =====================
+
+const replaceImage = asyncHandler(async(req,res)=>{
+
 
     const image =
         req.files?.images?.[0];
 
-    if (!image) {
 
-        throw new Error("Image is required");
+    if(!image){
+
+        throw new Error(
+            "Image is required"
+        );
 
     }
 
-    try {
 
-        const result =
-            await productService.replaceImage(
 
-                req.params.id,
+    const uploaded =
+        await uploadToR2(
 
-                req.params.image,
+            image.buffer,
 
-                image.filename
+            image.originalname,
 
-            );
+            image.mimetype,
 
-        ApiResponse.success(
-
-            res,
-
-            result,
-
-            "Image replaced successfully"
+            "products/images"
 
         );
 
-    } catch (error) {
 
-        deleteUploadedFiles(req.files);
 
-        throw error;
+    const result =
+        await productService.replaceImage(
 
-    }
+            req.params.id,
+
+            req.params.image,
+
+            uploaded.url
+
+        );
+
+
+
+    ApiResponse.success(
+
+        res,
+
+        result,
+
+        "Image replaced successfully"
+
+    );
+
 
 });
 
-const setThumbnail = asyncHandler(async (req, res) => {
+
+
+
+// =====================
+// SET THUMBNAIL
+// =====================
+
+const setThumbnail = asyncHandler(async(req,res)=>{
+
 
     const result =
         await productService.setThumbnail(
@@ -212,6 +472,8 @@ const setThumbnail = asyncHandler(async (req, res) => {
             req.params.image
 
         );
+
+
 
     ApiResponse.success(
 
@@ -223,9 +485,18 @@ const setThumbnail = asyncHandler(async (req, res) => {
 
     );
 
+
 });
 
-const reorderImages = asyncHandler(async (req, res) => {
+
+
+
+// =====================
+// REORDER IMAGE
+// =====================
+
+const reorderImages = asyncHandler(async(req,res)=>{
+
 
     const result =
         await productService.reorderImages(
@@ -235,6 +506,8 @@ const reorderImages = asyncHandler(async (req, res) => {
             req.body.images
 
         );
+
+
 
     ApiResponse.success(
 
@@ -246,17 +519,27 @@ const reorderImages = asyncHandler(async (req, res) => {
 
     );
 
+
 });
 
-const bulkDelete = asyncHandler(async (req, res) => {
+
+
+
+// =====================
+// BULK DELETE
+// =====================
+
+const bulkDelete = asyncHandler(async(req,res)=>{
+
 
     const result =
-
         await productService.bulkDelete(
 
             req.body.ids
 
         );
+
+
 
     ApiResponse.success(
 
@@ -268,9 +551,18 @@ const bulkDelete = asyncHandler(async (req, res) => {
 
     );
 
+
 });
 
-const removeVideo = asyncHandler(async (req, res) => {
+
+
+
+// =====================
+// REMOVE VIDEO
+// =====================
+
+const removeVideo = asyncHandler(async(req,res)=>{
+
 
     const result =
         await productService.removeVideo(
@@ -278,6 +570,8 @@ const removeVideo = asyncHandler(async (req, res) => {
             req.params.id
 
         );
+
+
 
     ApiResponse.success(
 
@@ -289,14 +583,27 @@ const removeVideo = asyncHandler(async (req, res) => {
 
     );
 
+
 });
 
-const remove = asyncHandler(async (req, res) => {
+
+
+
+// =====================
+// SOFT DELETE
+// =====================
+
+const remove = asyncHandler(async(req,res)=>{
+
 
     const result =
         await productService.remove(
+
             req.params.id
+
         );
+
+
 
     ApiResponse.success(
 
@@ -308,14 +615,27 @@ const remove = asyncHandler(async (req, res) => {
 
     );
 
+
 });
 
-const restore = asyncHandler(async (req, res) => {
+
+
+
+// =====================
+// RESTORE
+// =====================
+
+const restore = asyncHandler(async(req,res)=>{
+
 
     const result =
         await productService.restore(
+
             req.params.id
+
         );
+
+
 
     ApiResponse.success(
 
@@ -327,15 +647,26 @@ const restore = asyncHandler(async (req, res) => {
 
     );
 
+
 });
 
-const permanentDelete = asyncHandler(async (req, res) => {
+
+
+
+// =====================
+// PERMANENT DELETE
+// =====================
+
+const permanentDelete = asyncHandler(async(req,res)=>{
+
 
     await productService.permanentDelete(
 
         req.params.id
 
     );
+
+
 
     ApiResponse.success(
 
@@ -347,9 +678,14 @@ const permanentDelete = asyncHandler(async (req, res) => {
 
     );
 
+
 });
 
+
+
+
 export default {
+
 
     create,
 
@@ -361,13 +697,13 @@ export default {
 
     removeImage,
 
+    replaceImage,
+
     setThumbnail,
 
     reorderImages,
 
     bulkDelete,
-
-    replaceImage,
 
     removeVideo,
 
@@ -375,5 +711,11 @@ export default {
 
     restore,
 
-    permanentDelete
+    permanentDelete,
+
+    getPublic,
+
+    getPublicBySlug
+
+
 };

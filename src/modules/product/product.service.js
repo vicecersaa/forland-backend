@@ -6,7 +6,21 @@ import findDocumentOrThrow from "../../utils/findDocumentOrThrow.js";
 import queryBuilder from "../../utils/queryBuilder.js";
 import paginate from "../../utils/paginate.js";
 import Category from "../category/category.model.js";
-import deleteFile from "../../utils/deleteFile.js";
+import deleteFromR2 from "../../utils/deleteFromR2.js";
+
+const getR2Key = (url = "") => {
+
+    if (!url) return "";
+
+    return url.replace(
+
+        `${process.env.R2_PUBLIC_URL}/`,
+
+        ""
+
+    );
+
+};
 
 
 const calculateSummary = (product) => {
@@ -228,6 +242,231 @@ const getAll = async (query) => {
 
 };
 
+const getPublic = async (query) => {
+
+    const {
+
+        page,
+
+        limit,
+
+        skip,
+
+        filter,
+
+        sort
+
+    } = queryBuilder(query, {
+
+        searchableFields: [
+
+            "name",
+
+            "description"
+
+        ]
+
+    });
+
+    // Hanya tampilkan produk aktif
+    filter.isActive = true;
+
+    // ===========================
+    // CATEGORY FILTER (SLUG)
+    // ===========================
+
+    if (query.category) {
+
+        const category = await Category.findOne({
+
+            slug: query.category,
+
+            isActive: true
+
+        });
+
+        if (!category) {
+
+            return {
+
+                items: [],
+
+                pagination: paginate({
+
+                    page,
+
+                    limit,
+
+                    totalItems: 0
+
+                })
+
+            };
+
+        }
+
+        filter.category = category._id;
+
+    }
+
+    // ===========================
+    // PRICE FILTER
+    // ===========================
+
+    if (query.minPrice || query.maxPrice) {
+
+        filter.minPrice = {};
+
+        if (query.minPrice) {
+
+            filter.minPrice.$gte = Number(query.minPrice);
+
+        }
+
+        if (query.maxPrice) {
+
+            filter.minPrice.$lte = Number(query.maxPrice);
+
+        }
+
+    }
+
+    // ===========================
+    // SORTING
+    // ===========================
+
+    let publicSort = sort;
+
+    switch (query.sort) {
+
+        case "newest":
+
+            publicSort = {
+
+                createdAt: -1
+
+            };
+
+            break;
+
+        case "oldest":
+
+            publicSort = {
+
+                createdAt: 1
+
+            };
+
+            break;
+
+        case "price_asc":
+
+            publicSort = {
+
+                minPrice: 1
+
+            };
+
+            break;
+
+        case "price_desc":
+
+            publicSort = {
+
+                minPrice: -1
+
+            };
+
+            break;
+
+        case "name_asc":
+
+            publicSort = {
+
+                name: 1
+
+            };
+
+            break;
+
+        case "name_desc":
+
+            publicSort = {
+
+                name: -1
+
+            };
+
+            break;
+
+    }
+
+    // ===========================
+    // QUERY
+    // ===========================
+
+    const totalItems = await Product.countDocuments(filter);
+
+    const items = await Product.find(filter)
+
+        .populate("category", "name slug")
+
+        .sort(publicSort)
+
+        .skip(skip)
+
+        .limit(limit);
+
+    return {
+
+        items,
+
+        pagination: paginate({
+
+            page,
+
+            limit,
+
+            totalItems
+
+        })
+
+    };
+
+};
+
+const getPublicBySlug = async (slug) => {
+
+    const product = await Product.findOne({
+
+        slug,
+
+        isActive: true
+
+    }).populate(
+
+        "category",
+
+        "name slug"
+
+    );
+
+    if (!product) {
+
+        throw new ApiError(
+
+            404,
+
+            "Product not found"
+
+        );
+
+    }
+
+    return product;
+
+};
+
 const getById = async (id) => {
 
     return await findDocumentOrThrow(
@@ -256,6 +495,8 @@ const update = async (id, payload) => {
 
     const uploadedImages = payload.images ?? [];
     const uploadedVideo = payload.video ?? null;
+
+    const oldVideo = product.video;
 
     try {
 
@@ -311,52 +552,37 @@ const update = async (id, payload) => {
         }
 
         // ==========================
-        // Append Images
+        // Images
         // ==========================
 
         if (uploadedImages.length > 0) {
 
-    payload.images = [
+            payload.images = [
 
-        ...product.images,
+                ...product.images,
 
-        ...uploadedImages
+                ...uploadedImages
 
-    ];
+            ];
 
-    if (!product.thumbnail) {
+            if (!product.thumbnail) {
 
-        payload.thumbnail = uploadedImages[0];
-
-    }
-
-} else {
-
-    delete payload.images;
-
-}
-
-        // ==========================
-        // Replace Video
-        // ==========================
-
-        if (uploadedVideo) {
-
-            if (product.video) {
-
-                deleteFile(
-
-                    "products/videos",
-
-                    product.video
-
-                );
+                payload.thumbnail =
+                    uploadedImages[0];
 
             }
 
-            payload.video = uploadedVideo;
-
         } else {
+
+            delete payload.images;
+
+        }
+
+        // ==========================
+        // Video
+        // ==========================
+
+        if (!uploadedVideo) {
 
             delete payload.video;
 
@@ -390,33 +616,53 @@ const update = async (id, payload) => {
 
         await product.populate("category");
 
+        // ==========================
+        // Delete old video AFTER success
+        // ==========================
+
+        if (
+
+            uploadedVideo &&
+            oldVideo &&
+            oldVideo !== uploadedVideo
+
+        ) {
+
+            await deleteFromR2(
+
+                getR2Key(oldVideo)
+
+            );
+
+        }
+
         return product;
 
     } catch (error) {
 
-        // Rollback image baru
+        // ==========================
+        // Rollback uploaded images
+        // ==========================
 
-        uploadedImages.forEach(image => {
+        for (const image of uploadedImages) {
 
-            deleteFile(
+            await deleteFromR2(
 
-                "products/images",
-
-                image
+                getR2Key(image)
 
             );
 
-        });
+        }
 
-        // Rollback video baru
+        // ==========================
+        // Rollback uploaded video
+        // ==========================
 
         if (uploadedVideo) {
 
-            deleteFile(
+            await deleteFromR2(
 
-                "products/videos",
-
-                uploadedVideo
+                getR2Key(uploadedVideo)
 
             );
 
@@ -492,6 +738,7 @@ return product;
 };
 
 const replaceImage = async (
+    
 
     productId,
 
@@ -517,11 +764,10 @@ const replaceImage = async (
 
     if (index === -1) {
 
-        deleteFile(
+        // rollback image baru
+        await deleteFromR2(
 
-            "products/images",
-
-            newImage
+            getR2Key(newImage)
 
         );
 
@@ -545,11 +791,10 @@ const replaceImage = async (
 
     await product.save();
 
-    deleteFile(
+    // hapus image lama setelah DB berhasil
+    await deleteFromR2(
 
-        "products/images",
-
-        oldImage
+        getR2Key(oldImage)
 
     );
 
@@ -894,6 +1139,10 @@ export default {
 
     restore,
     
-    permanentDelete
+    permanentDelete,
+
+    getPublic,
+
+    getPublicBySlug
 
 };

@@ -1,17 +1,44 @@
-import fs from "fs";
+import deleteFromR2 from "./deleteFromR2.js";
 
-const deleteUploadedFiles = (files = {}) => {
 
-    Object.values(files)
-        .flat()
-        .forEach(file => {
+const deleteUploadedFiles = async (files = {}) => {
 
-            if (fs.existsSync(file.path)) {
-                fs.unlinkSync(file.path);
+    const uploadedFiles = Object
+        .values(files)
+        .flat();
+
+
+    for (const file of uploadedFiles) {
+
+
+        try {
+
+
+            if (file.key) {
+
+                await deleteFromR2(
+                    file.key
+                );
+
             }
 
-        });
+
+        } catch (error) {
+
+
+            console.error(
+                "Failed deleting uploaded file:",
+                error.message
+            );
+
+
+        }
+
+
+    }
+
 
 };
+
 
 export default deleteUploadedFiles;

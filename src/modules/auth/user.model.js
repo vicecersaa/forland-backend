@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
     {
+
         email: {
             type: String,
             required: [true, "Email is required"],
@@ -10,12 +11,6 @@ const userSchema = new mongoose.Schema(
             trim: true,
         },
 
-        phone: {
-            type: String,
-            required: [true, "Phone number is required"],
-            unique: true,
-            trim: true,
-        },
 
         password: {
             type: String,
@@ -24,21 +19,51 @@ const userSchema = new mongoose.Schema(
             select: false,
         },
 
+
         role: {
             type: String,
-            enum: ["customer", "admin"],
+            enum: [
+                "customer",
+                "admin"
+            ],
             default: "customer",
         },
+
 
         isActive: {
             type: Boolean,
             default: true,
         },
 
+
         lastLogin: {
             type: Date,
             default: null,
         },
+
+
+        // =========================
+        // PASSWORD RESET
+        // =========================
+
+        resetPasswordToken: {
+
+            type: String,
+
+            default: null,
+
+        },
+
+
+        resetPasswordExpire: {
+
+            type: Date,
+
+            default: null,
+
+        },
+
+
     },
     {
         timestamps: true,
@@ -46,6 +71,11 @@ const userSchema = new mongoose.Schema(
     }
 );
 
-const User = mongoose.model("User", userSchema);
+
+const User = mongoose.model(
+    "User",
+    userSchema
+);
+
 
 export default User;

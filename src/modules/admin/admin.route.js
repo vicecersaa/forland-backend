@@ -7,11 +7,6 @@ import authorize from "../../middleware/role.middleware.js";
 
 const router = Router();
 
-router.get(
-    "/dashboard",
-    authMiddleware,
-    authorize("admin"),
-    adminController.dashboard
-);
+
 
 export default router;

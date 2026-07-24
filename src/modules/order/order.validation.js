@@ -32,84 +32,68 @@ const shippingAddressSchema = z.object({
 
 export const createOrderSchema = z.object({
 
-    body: z.object({
+    customer: z.string().optional(),
 
-        customer: z.string().optional(),
+    items: z.array(orderItemSchema).min(1),
 
-        items: z.array(orderItemSchema).min(1),
+    shippingCost: z.coerce.number().default(0),
 
-        paymentMethod: z.string().default(""),
+    discount: z.coerce.number().default(0),
 
-        shippingCost: z.coerce.number().default(0),
+    paymentMethod: z.string(),
 
-        discount: z.coerce.number().default(0),
+    shippingAddress: shippingAddressSchema,
 
-        shippingAddress: shippingAddressSchema,
-
-        notes: z.string().optional().default("")
-
-    })
+    notes: z.string().optional().default("")
 
 });
 
 export const updateOrderStatusSchema = z.object({
 
-    body: z.object({
+    status: z.enum([
 
-        status: z.enum([
+        "pending",
 
-            "pending",
+        "processing",
 
-            "processing",
+        "shipped",
 
-            "shipped",
+        "completed",
 
-            "completed",
+        "cancelled"
 
-            "cancelled"
-
-        ])
-
-    })
+    ])
 
 });
 
 export const updatePaymentStatusSchema = z.object({
 
-    body: z.object({
+    paymentStatus: z.enum([
 
-        paymentStatus: z.enum([
+        "pending",
 
-            "pending",
+        "paid",
 
-            "paid",
+        "failed",
 
-            "failed",
+        "refunded"
 
-            "refunded"
-
-        ])
-
-    })
+    ])
 
 });
 
 export const updateShippingStatusSchema = z.object({
 
-    body: z.object({
+    shippingStatus: z.enum([
 
-        shippingStatus: z.enum([
+        "pending",
 
-            "pending",
+        "packed",
 
-            "packed",
+        "shipped",
 
-            "shipped",
+        "delivered"
 
-            "delivered"
-
-        ])
-
-    })
+    ])
 
 });

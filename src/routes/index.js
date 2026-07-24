@@ -6,6 +6,17 @@ import categoryRoute from "../modules/category/category.route.js";
 import categoryPublicRoute from "../modules/category/category.public.route.js";
 import productRoute from "../modules/product/product.route.js";
 import orderRoute from "../modules/order/order.route.js";
+import dashboardRoute from "../modules/dashboard/dashboard.route.js";
+import couponRoute from "../modules/coupon/coupon.route.js";
+import bannerRoute from "../modules/banner/banner.route.js";
+import bannerPublicRoute from "../modules/banner/banner.public.route.js";
+import productPublicRoute from "../modules/product/product.public.route.js";
+import homeRoute from "../modules/home/home.route.js";
+import orderMeRoute from "../modules/order/order.me.route.js";
+import checkoutRoute from "../modules/checkout/checkout.route.js";
+import cartRoute from "../modules/cart/cart.route.js";
+import paymentRoute from "../modules/payment/payment.route.js";
+
 
 const router = Router();
 
@@ -20,14 +31,32 @@ router.get("/", (req, res) => {
 
 router.use("/auth", authRoute);
 
-router.use("/admin", adminRoute);
-
 router.use("/admin/categories", categoryRoute);
 
 router.use("/categories", categoryPublicRoute);
 
 router.use("/admin/products", productRoute);
 
+router.use("/products", productPublicRoute);
+
 router.use("/admin/orders", orderRoute);
+
+router.use("/admin/coupons", couponRoute);
+
+router.use("/admin/banners", bannerRoute);
+
+router.use("/banners", bannerPublicRoute);
+
+router.use("/admin/dashboard", dashboardRoute);
+
+router.use("/home", homeRoute);
+
+router.use("/orders/my", orderMeRoute);
+
+router.use("/checkout", checkoutRoute);
+
+router.use("/payment", paymentRoute);
+
+router.use("/cart", cartRoute);
 
 export default router;

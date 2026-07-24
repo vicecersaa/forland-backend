@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 
+
 const orderItemSchema = new mongoose.Schema({
 
     product: {
@@ -78,11 +79,14 @@ const orderItemSchema = new mongoose.Schema({
 
     }
 
+
 }, {
 
     _id: false
 
 });
+
+
 
 const addressSchema = new mongoose.Schema({
 
@@ -100,13 +104,17 @@ const addressSchema = new mongoose.Schema({
 
     address: String
 
+
 }, {
 
     _id: false
 
 });
 
+
+
 const orderSchema = new mongoose.Schema({
+
 
     orderNumber: {
 
@@ -118,6 +126,7 @@ const orderSchema = new mongoose.Schema({
 
     },
 
+
     customer: {
 
         type: mongoose.Schema.Types.ObjectId,
@@ -128,6 +137,7 @@ const orderSchema = new mongoose.Schema({
 
     },
 
+
     items: {
 
         type: [orderItemSchema],
@@ -135,6 +145,7 @@ const orderSchema = new mongoose.Schema({
         required: true
 
     },
+
 
     subtotal: {
 
@@ -144,6 +155,7 @@ const orderSchema = new mongoose.Schema({
 
     },
 
+
     shippingCost: {
 
         type: Number,
@@ -151,6 +163,7 @@ const orderSchema = new mongoose.Schema({
         default: 0
 
     },
+
 
     discount: {
 
@@ -160,6 +173,7 @@ const orderSchema = new mongoose.Schema({
 
     },
 
+
     total: {
 
         type: Number,
@@ -167,6 +181,12 @@ const orderSchema = new mongoose.Schema({
         default: 0
 
     },
+
+
+
+    // ======================
+    // ORDER STATUS
+    // ======================
 
     status: {
 
@@ -190,6 +210,12 @@ const orderSchema = new mongoose.Schema({
 
     },
 
+
+
+    // ======================
+    // PAYMENT STATUS
+    // ======================
+
     paymentStatus: {
 
         type: String,
@@ -209,6 +235,63 @@ const orderSchema = new mongoose.Schema({
         default: "pending"
 
     },
+
+
+    paymentMethod: {
+
+        type: String,
+
+        default: ""
+
+    },
+
+
+    // ======================
+    // MIDTRANS DATA
+    // ======================
+
+
+    paymentId: {
+
+        type: String,
+
+        default: ""
+
+    },
+
+
+    paymentToken: {
+
+        type: String,
+
+        default: ""
+
+    },
+
+
+    paymentUrl: {
+
+        type: String,
+
+        default: ""
+
+    },
+
+
+    paidAt: {
+
+        type: Date,
+
+        default: null
+
+    },
+
+
+
+    // ======================
+    // SHIPPING
+    // ======================
+
 
     shippingStatus: {
 
@@ -230,13 +313,7 @@ const orderSchema = new mongoose.Schema({
 
     },
 
-    paymentMethod: {
 
-        type: String,
-
-        default: ""
-
-    },
 
     shippingAddress: {
 
@@ -246,6 +323,7 @@ const orderSchema = new mongoose.Schema({
 
     },
 
+
     notes: {
 
         type: String,
@@ -253,6 +331,7 @@ const orderSchema = new mongoose.Schema({
         default: ""
 
     }
+
 
 }, {
 
@@ -268,11 +347,16 @@ orderSchema.index({
 
 });
 
+
 orderSchema.index({
 
     paymentStatus: 1
 
 });
+
+
+
+
 
 export default mongoose.model(
 
