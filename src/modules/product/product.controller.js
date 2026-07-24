@@ -363,18 +363,16 @@ const update = asyncHandler(async(req,res)=>{
 // DELETE IMAGE
 // =====================
 
-const removeImage = asyncHandler(async(req,res)=>{
-
+const removeImage = asyncHandler(async (req, res) => {
 
     const result =
         await productService.removeImage(
 
             req.params.id,
 
-            req.params.image
+            Number(req.params.index)
 
         );
-
 
     ApiResponse.success(
 
@@ -385,7 +383,6 @@ const removeImage = asyncHandler(async(req,res)=>{
         "Image deleted successfully"
 
     );
-
 
 });
 
@@ -428,16 +425,16 @@ const replaceImage = asyncHandler(async(req,res)=>{
 
 
 
-    const result =
-        await productService.replaceImage(
+const result =
+    await productService.replaceImage(
 
-            req.params.id,
+        req.params.id,
 
-            req.params.image,
+        Number(req.params.index),
 
-            uploaded.url
+        uploaded.url
 
-        );
+    );
 
 
 

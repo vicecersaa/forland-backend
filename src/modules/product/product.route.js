@@ -131,7 +131,7 @@ router.patch(
 
 router.patch(
 
-    "/:id/images/:image",
+    "/:id/images/:index",
 
     authMiddleware,
 
@@ -183,7 +183,7 @@ router.patch(
 
 router.delete(
 
-    "/:id/images/:image",
+    "/:id/images/:index",
 
     authMiddleware,
 

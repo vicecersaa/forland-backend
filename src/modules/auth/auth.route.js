@@ -1,19 +1,99 @@
 import { Router } from "express";
+
 import authController from "./auth.controller.js";
 import authMiddleware from "../../middleware/auth.middleware.js";
 
+import {
+
+    loginLimiter,
+    registerLimiter
+
+} from "../../middleware/rateLimit.middleware.js";
+
 const router = Router();
 
-router.post("/register", authController.register);
+// ======================
+// REGISTER
+// ======================
 
-router.post("/login", authController.customerLogin);
+router.post(
 
-router.post("/admin/login", authController.adminLogin);
+    "/register",
 
-router.get("/me", authMiddleware, authController.me);
+    registerLimiter,
 
-router.post("/forgot-password", authController.forgotPassword);
+    authController.register
 
-router.post("/reset-password/:token", authController.resetPassword);
+);
+
+// ======================
+// CUSTOMER LOGIN
+// ======================
+
+router.post(
+
+    "/login",
+
+    loginLimiter,
+
+    authController.customerLogin
+
+);
+
+// ======================
+// ADMIN LOGIN
+// ======================
+
+router.post(
+
+    "/admin/login",
+
+    loginLimiter,
+
+    authController.adminLogin
+
+);
+
+// ======================
+// ME
+// ======================
+
+router.get(
+
+    "/me",
+
+    authMiddleware,
+
+    authController.me
+
+);
+
+// ======================
+// FORGOT PASSWORD
+// ======================
+
+router.post(
+
+    "/forgot-password",
+
+    loginLimiter,
+
+    authController.forgotPassword
+
+);
+
+// ======================
+// RESET PASSWORD
+// ======================
+
+router.post(
+
+    "/reset-password/:token",
+
+    loginLimiter,
+
+    authController.resetPassword
+
+);
 
 export default router;

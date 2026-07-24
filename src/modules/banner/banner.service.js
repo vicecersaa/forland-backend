@@ -3,14 +3,22 @@ import Banner from "./banner.model.js";
 import ApiError from "../../utils/ApiError.js";
 import queryBuilder from "../../utils/queryBuilder.js";
 import paginate from "../../utils/paginate.js";
+import findDocumentOrThrow from "../../utils/findDocumentOrThrow.js";
+
+// =====================
+// CREATE
+// =====================
 
 const create = async (payload) => {
 
     if (!payload.image) {
 
         throw new ApiError(
+
             400,
+
             "Banner image is required"
+
         );
 
     }
@@ -19,36 +27,56 @@ const create = async (payload) => {
 
 };
 
+// =====================
+// GET ALL
+// =====================
+
 const getAll = async (query) => {
 
     const {
+
         page,
+
         limit,
+
         skip,
+
         filter,
+
         sort
+
     } = queryBuilder(query);
 
-    const totalItems = await Banner.countDocuments(filter);
+    const totalItems =
+        await Banner.countDocuments(filter);
 
-    const items = await Banner.find(filter)
-        .sort(sort)
-        .skip(skip)
-        .limit(limit);
+    const items =
+        await Banner.find(filter)
+            .sort(sort)
+            .skip(skip)
+            .limit(limit);
 
     return {
 
         items,
 
         pagination: paginate({
+
             page,
+
             limit,
+
             totalItems
+
         })
 
     };
 
 };
+
+// =====================
+// PUBLIC
+// =====================
 
 const getPublic = async () => {
 
@@ -72,40 +100,49 @@ const getPublic = async () => {
 
 };
 
+// =====================
+// GET BY ID
+// =====================
+
 const getById = async (id) => {
 
-    const banner = await Banner.findById(id);
+    return await findDocumentOrThrow(
 
-    if (!banner) {
+        Banner,
 
-        throw new ApiError(
-            404,
-            "Banner not found"
-        );
+        id,
 
-    }
+        "Banner not found"
 
-    return banner;
+    );
 
 };
 
-const update = async (id, payload) => {
+// =====================
+// UPDATE
+// =====================
 
-    const banner = await Banner.findById(id);
+const update = async (
 
-    if (!banner) {
+    id,
 
-        throw new ApiError(
+    payload
 
-            404,
+) => {
+
+    const banner =
+        await findDocumentOrThrow(
+
+            Banner,
+
+            id,
 
             "Banner not found"
 
         );
 
-    }
-
-    const oldImage = banner.image;
+    const oldImage =
+        banner.image;
 
     Object.assign(
 
@@ -127,23 +164,25 @@ const update = async (id, payload) => {
 
 };
 
+// =====================
+// DELETE
+// =====================
+
 const remove = async (id) => {
 
-    const banner = await Banner.findById(id);
+    const banner =
+        await findDocumentOrThrow(
 
-    if (!banner) {
+            Banner,
 
-        throw new ApiError(
-
-            404,
+            id,
 
             "Banner not found"
 
         );
 
-    }
-
-    const oldImage = banner.image;
+    const oldImage =
+        banner.image;
 
     await banner.deleteOne();
 

@@ -1,24 +1,81 @@
 import asyncHandler from "../../utils/asyncHandler.js";
 import ApiResponse from "../../utils/ApiResponse.js";
-import deleteUploadedFiles from "../../utils/deleteUploadedFiles.js";
+
 import bannerService from "./banner.service.js";
-import deleteFile from "../../utils/deleteFile.js";
+
+import uploadToR2 from "../../utils/uploadToR2.js";
+import deleteFromR2 from "../../utils/deleteFromR2.js";
+
+const uploadImageToR2 = async (files = {}) => {
+
+    if (!files.image?.[0]) {
+
+        return {
+
+            image: "",
+            imageKey: null
+
+        };
+
+    }
+
+    const file = files.image[0];
+
+    const result = await uploadToR2(
+
+        file.buffer,
+
+        file.originalname,
+
+        file.mimetype,
+
+        "banners"
+
+    );
+
+    return {
+
+        image: result.url,
+
+        imageKey: result.key
+
+    };
+
+};
+
+const getR2Key = (url = "") => {
+
+    if (!url) return "";
+
+    return url.replace(
+
+        `${process.env.R2_PUBLIC_URL}/`,
+
+        ""
+
+    );
+
+};
+
+// =====================
+// CREATE
+// =====================
 
 const create = asyncHandler(async (req, res) => {
 
+    let uploaded = null;
+
     try {
 
-        const image =
-            req.files?.image?.[0]?.filename || "";
+        uploaded = await uploadImageToR2(req.files);
 
-        const result =
-            await bannerService.create({
+        const result = await bannerService.create({
 
-                ...req.body,
+            ...req.body,
 
-                image
+            image: uploaded.image
 
-            });
+        });
 
         ApiResponse.success(
 
@@ -34,13 +91,25 @@ const create = asyncHandler(async (req, res) => {
 
     } catch (error) {
 
-        deleteUploadedFiles(req.files);
+        if (uploaded?.imageKey) {
+
+            await deleteFromR2(
+
+                uploaded.imageKey
+
+            );
+
+        }
 
         throw error;
 
     }
 
 });
+
+// =====================
+// GET ALL
+// =====================
 
 const getAll = asyncHandler(async (req, res) => {
 
@@ -62,7 +131,9 @@ const getAll = asyncHandler(async (req, res) => {
 
 });
 
-
+// =====================
+// PUBLIC
+// =====================
 
 const getPublic = asyncHandler(async (req, res) => {
 
@@ -79,6 +150,10 @@ const getPublic = asyncHandler(async (req, res) => {
     );
 
 });
+
+// =====================
+// GET BY ID
+// =====================
 
 const getById = asyncHandler(async (req, res) => {
 
@@ -100,45 +175,51 @@ const getById = asyncHandler(async (req, res) => {
 
 });
 
+// =====================
+// UPDATE
+// =====================
+
 const update = asyncHandler(async (req, res) => {
 
-    const newImage =
-        req.files?.image?.[0]?.filename;
+    let uploaded = null;
 
     try {
 
-        const result =
-            await bannerService.update(
+        uploaded = await uploadImageToR2(req.files);
 
-                req.params.id,
+        const result = await bannerService.update(
 
-                {
+            req.params.id,
 
-                    ...req.body,
+            {
 
-                    ...(newImage && {
+                ...req.body,
 
-                        image: newImage
+                ...(uploaded.image && {
 
-                    })
+                    image: uploaded.image
 
-                }
+                })
 
-            );
+            }
+
+        );
 
         if (
 
-            newImage &&
+            uploaded.image &&
 
             result.oldImage
 
         ) {
 
-            deleteFile(
+            await deleteFromR2(
 
-                "banners",
+                getR2Key(
 
-                result.oldImage
+                    result.oldImage
+
+                )
 
             );
 
@@ -156,7 +237,15 @@ const update = asyncHandler(async (req, res) => {
 
     } catch (error) {
 
-        deleteUploadedFiles(req.files);
+        if (uploaded?.imageKey) {
+
+            await deleteFromR2(
+
+                uploaded.imageKey
+
+            );
+
+        }
 
         throw error;
 
@@ -164,22 +253,27 @@ const update = asyncHandler(async (req, res) => {
 
 });
 
+// =====================
+// DELETE
+// =====================
+
 const remove = asyncHandler(async (req, res) => {
 
-    const result =
-        await bannerService.remove(
+    const result = await bannerService.remove(
 
-            req.params.id
+        req.params.id
 
-        );
+    );
 
     if (result.oldImage) {
 
-        deleteFile(
+        await deleteFromR2(
 
-            "banners",
+            getR2Key(
 
-            result.oldImage
+                result.oldImage
+
+            )
 
         );
 

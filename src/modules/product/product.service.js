@@ -678,7 +678,7 @@ const removeImage = async (
 
     productId,
 
-    imageName
+    index
 
 ) => {
 
@@ -695,7 +695,9 @@ const removeImage = async (
 
     if (
 
-        !product.images.includes(imageName)
+        index < 0 ||
+
+        index >= product.images.length
 
     ) {
 
@@ -709,40 +711,35 @@ const removeImage = async (
 
     }
 
-    product.images =
-    product.images.filter(
+    const image =
+        product.images[index];
 
-        image => image !== imageName
+    product.images.splice(index, 1);
+
+    if (product.thumbnail === image) {
+
+        product.thumbnail =
+            product.images[0] || "";
+
+    }
+
+    await product.save();
+
+    await deleteFromR2(
+
+        getR2Key(image)
 
     );
 
-if (product.thumbnail === imageName) {
-
-    product.thumbnail =
-        product.images[0] ?? "";
-
-}
-
-deleteFile(
-
-    "products/images",
-
-    imageName
-
-);
-
-await product.save();
-
-return product;
+    return product;
 
 };
 
 const replaceImage = async (
-    
 
     productId,
 
-    oldImage,
+    index,
 
     newImage
 
@@ -759,10 +756,13 @@ const replaceImage = async (
 
         );
 
-    const index =
-        product.images.indexOf(oldImage);
+    if (
 
-    if (index === -1) {
+        index < 0 ||
+
+        index >= product.images.length
+
+    ) {
 
         // rollback image baru
         await deleteFromR2(
@@ -781,17 +781,25 @@ const replaceImage = async (
 
     }
 
-    product.images[index] = newImage;
+    const oldImage =
+        product.images[index];
 
-    if (product.thumbnail === oldImage) {
+    product.images[index] =
+        newImage;
 
-        product.thumbnail = newImage;
+    if (
+
+        product.thumbnail === oldImage
+
+    ) {
+
+        product.thumbnail =
+            newImage;
 
     }
 
     await product.save();
 
-    // hapus image lama setelah DB berhasil
     await deleteFromR2(
 
         getR2Key(oldImage)
@@ -987,17 +995,18 @@ const removeVideo = async (productId) => {
 
     }
 
-    deleteFile(
-
-        "products/videos",
-
-        product.video
-
-    );
+    const oldVideo =
+        product.video;
 
     product.video = "";
 
     await product.save();
+
+    await deleteFromR2(
+
+        getR2Key(oldVideo)
+
+    );
 
     return product;
 
@@ -1069,47 +1078,56 @@ const restore = async (id) => {
 
 };
 
-const permanentDelete = async (id) => {
+const permanentDelete = async (productId) => {
 
-    const product = await findDocumentOrThrow(
+    const product =
+        await findDocumentOrThrow(
 
-        Product,
+            Product,
 
-        id,
+            productId,
 
-        "Product not found"
+            "Product not found"
 
-    );
+        );
 
-    // Hapus semua gambar
+    // ==========================
+    // Delete Images
+    // ==========================
+
     for (const image of product.images) {
 
-        deleteFile(
+        await deleteFromR2(
 
-            "products/images",
-
-            image
+            getR2Key(image)
 
         );
 
     }
 
-    // Hapus video
+    // ==========================
+    // Delete Video
+    // ==========================
+
     if (product.video) {
 
-        deleteFile(
+        await deleteFromR2(
 
-            "products/videos",
-
-            product.video
+            getR2Key(product.video)
 
         );
 
     }
 
-    await Product.findByIdAndDelete(id);
+    // ==========================
+    // Delete Product
+    // ==========================
 
-    return null;
+    await Product.findByIdAndDelete(
+
+        productId
+
+    );
 
 };
 

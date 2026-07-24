@@ -7,22 +7,42 @@ import findDocumentOrThrow from "../../utils/findDocumentOrThrow.js";
 
 const create = async (payload) => {
 
+    const slug = makeSlug(payload.name);
+
     const existingCategory = await Category.findOne({
-        name: payload.name
+
+        $or: [
+
+            { name: payload.name },
+
+            { slug }
+
+        ]
+
     });
 
     if (existingCategory) {
-        throw new ApiError(409, "Category already exists");
+
+        throw new ApiError(
+
+            409,
+
+            "Category already exists"
+
+        );
+
     }
 
-    const slug = makeSlug(payload.name);
-
     const category = await Category.create({
+
         ...payload,
+
         slug
+
     });
 
     return category;
+
 };
 
 const getAll = async (query) => {
@@ -87,41 +107,68 @@ const getById = async (id) => {
 const update = async (id, payload) => {
 
     const category = await findDocumentOrThrow(
+
         Category,
+
         id,
+
         "Category not found"
+
     );
 
-    // Simpan gambar lama DULU
-    const oldImage = category.image;
-
-    // kalau name diubah
     if (
+
         payload.name &&
         payload.name !== category.name
+
     ) {
 
         const exists = await Category.findOne({
-            name: payload.name
+
+            name: payload.name,
+
+            _id: { $ne: id }
+
         });
 
         if (exists) {
+
             throw new ApiError(
+
                 409,
+
                 "Category already exists"
+
             );
+
         }
 
-        payload.slug = makeSlug(payload.name);
+        payload.slug = makeSlug(
+
+            payload.name
+
+        );
+
     }
 
-    Object.assign(category, payload);
+    const oldImage = category.image;
+
+    Object.assign(
+
+        category,
+
+        payload
+
+    );
 
     await category.save();
 
     return {
+
         category,
+
         oldImage
+
     };
 
 };
