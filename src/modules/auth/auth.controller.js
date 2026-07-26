@@ -37,9 +37,20 @@ const adminLogin = asyncHandler(async (req, res) => {
         "admin"
     );
 
+    res.cookie(
+        "token",
+        result.token,
+        {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        }
+    );
+
     ApiResponse.success(
         res,
-        result,
+        { user: result.user },
         "Admin login success"
     );
 
@@ -101,11 +112,31 @@ async(req,res)=>{
 
 });
 
+const logout = asyncHandler(async (req, res) => {
+
+    res.clearCookie(
+        "token",
+        {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none",
+        }
+    );
+
+    ApiResponse.success(
+        res,
+        null,
+        "Logout success"
+    );
+
+});
+
 export default {
     register,
     customerLogin,
     adminLogin,
     me,
     forgotPassword,
-    resetPassword
+    resetPassword,
+    logout
 };

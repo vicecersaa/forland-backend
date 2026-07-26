@@ -5,13 +5,19 @@ import ApiError from "../utils/ApiError.js";
 const authMiddleware = async (req, res, next) => {
     try {
 
+        let token;
+
         const authHeader = req.headers.authorization;
 
-        if (!authHeader || !authHeader.startsWith("Bearer ")) {
-            throw new ApiError(401, "Unauthorized");
+        if (authHeader && authHeader.startsWith("Bearer ")) {
+            token = authHeader.split(" ")[1];
+        } else if (req.cookies && req.cookies.token) {
+            token = req.cookies.token;
         }
 
-        const token = authHeader.split(" ")[1];
+        if (!token) {
+            throw new ApiError(401, "Unauthorized");
+        }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
