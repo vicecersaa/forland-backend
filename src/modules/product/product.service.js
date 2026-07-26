@@ -929,45 +929,20 @@ const reorderImages = async (
 };
 
 const bulkDelete = async (ids) => {
-
     if (!Array.isArray(ids) || ids.length === 0) {
-
         throw new ApiError(
-
             400,
-
             "Product ids are required"
-
         );
-
     }
 
-    await Product.updateMany(
-
-        {
-
-            _id: {
-
-                $in: ids
-
-            }
-
-        },
-
-        {
-
-            isActive: false
-
-        }
-
-    );
+    for (const id of ids) {
+        await permanentDelete(id);
+    }
 
     return {
-
         deleted: ids.length
-
     };
-
 };
 
 const removeVideo = async (productId) => {
