@@ -4,8 +4,10 @@ import ApiError from "../utils/ApiError.js";
 
 const authMiddleware = async (req, res, next) => {
     try {
-
         let token;
+
+        console.log("Cookie Header:", req.headers.cookie);
+        console.log("Cookies:", req.cookies);
 
         const authHeader = req.headers.authorization;
 
@@ -15,24 +17,28 @@ const authMiddleware = async (req, res, next) => {
             token = req.cookies.token;
         }
 
+        console.log("Token:", token);
+
         if (!token) {
             throw new ApiError(401, "Unauthorized");
         }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        console.log("Decoded:", decoded);
 
         const user = await User.findById(decoded.id);
+        console.log("User:", user);
 
         if (!user) {
             throw new ApiError(401, "User not found");
         }
 
         req.user = user;
-
         next();
 
-    } catch (error) {
-        next(error);
+    } catch (err) {
+        console.error(err);
+        next(err);
     }
 };
 
