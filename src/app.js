@@ -54,6 +54,7 @@ app.use(
 const allowedOrigins = [
 
     "http://localhost:5173",
+    "http://localhost:8080",
 
     "https://forlandliving.com",
     "https://www.forlandliving.com",
