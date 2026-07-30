@@ -16,6 +16,7 @@ import orderMeRoute from "../modules/order/order.me.route.js";
 import checkoutRoute from "../modules/checkout/checkout.route.js";
 import cartRoute from "../modules/cart/cart.route.js";
 import paymentRoute from "../modules/payment/payment.route.js";
+import garansiRoute from "../modules/garansi/garansi.route.js";
 
 
 const router = Router();
@@ -58,5 +59,7 @@ router.use("/checkout", checkoutRoute);
 router.use("/payment", paymentRoute);
 
 router.use("/cart", cartRoute);
+
+router.use("/admin/warranty", garansiRoute);
 
 export default router;
