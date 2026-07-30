@@ -35,11 +35,22 @@ const collectImages = (doc = {}) => {
 
 // =====================
 // GET (public & admin sama-sama singleton, nggak ada filter khusus)
+//
+// Kalau belum pernah ada yang disave, findOne() balikin null.
+// Daripada balikin null (yang bikin frontend nerima shape yang salah
+// gara-gara `json?.data ?? json` fallback di api.ts), kita balikin
+// dokumen kosong dengan default dari schema (nggak disave ke DB,
+// cuma dibentuk in-memory) — supaya frontend selalu dapet struktur
+// yang valid dari hari pertama, sebelum admin sempat nge-save apa pun.
 // =====================
 
 const getContent = async () => {
 
-    return await Homepage.findOne({});
+    const doc = await Homepage.findOne({});
+
+    if (doc) return doc;
+
+    return new Homepage({});
 
 };
 
