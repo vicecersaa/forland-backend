@@ -18,14 +18,19 @@ export const createGaransiSchema = z
         path: ["warrantyEnd"]
     });
 
-export const updateGaransiSchema = z.object({
-    customerName: z.string().min(1).optional(),
-    address: z.string().optional(),
-    productName: z.string().min(1).optional(),
-    variant: z.string().optional(),
-    purchaseDate: z.coerce.date().optional(),
-    warrantyStart: z.coerce.date().optional(),
-    warrantyEnd: z.coerce.date().optional(),
-    status: z.enum(["active", "expired", "claimed", "void"]).optional(),
-    notes: z.string().optional()
-});
+export const updateGaransiSchema = z
+    .object({
+        customerName: z.string().min(1).optional(),
+        address: z.string().optional(),
+        productName: z.string().min(1).optional(),
+        variant: z.string().optional(),
+        purchaseDate: z.coerce.date().optional(),
+        warrantyStart: z.coerce.date().optional(),
+        warrantyEnd: z.coerce.date().optional(),
+        status: z.enum(["active", "expired", "claimed", "void"]).optional(),
+        notes: z.string().optional()
+    })
+    .refine(
+        (data) => !data.warrantyStart || !data.warrantyEnd || data.warrantyEnd >= data.warrantyStart,
+        { message: "Tanggal berakhir garansi tidak boleh sebelum tanggal mulai", path: ["warrantyEnd"] }
+    );
