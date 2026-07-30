@@ -11,7 +11,9 @@ import couponRoute from "../modules/coupon/coupon.route.js";
 import bannerRoute from "../modules/banner/banner.route.js";
 import bannerPublicRoute from "../modules/banner/banner.public.route.js";
 import productPublicRoute from "../modules/product/product.public.route.js";
-import homeRoute from "../modules/home/home.route.js";
+import homepageRoute from "../modules/homepage/homepage.route.js";
+import homepagePublicRoute from "../modules/homepage/homepage.public.route.js";
+
 import orderMeRoute from "../modules/order/order.me.route.js";
 import checkoutRoute from "../modules/checkout/checkout.route.js";
 import cartRoute from "../modules/cart/cart.route.js";
@@ -50,8 +52,6 @@ router.use("/banners", bannerPublicRoute);
 
 router.use("/admin/dashboard", dashboardRoute);
 
-router.use("/home", homeRoute);
-
 router.use("/orders/my", orderMeRoute);
 
 router.use("/checkout", checkoutRoute);
@@ -61,5 +61,10 @@ router.use("/payment", paymentRoute);
 router.use("/cart", cartRoute);
 
 router.use("/admin/warranty", garansiRoute);
+
+router.use("/admin/homepage", homepageRoute);
+
+router.use("/homepage", homepagePublicRoute);
+
 
 export default router;
