@@ -16,13 +16,31 @@ const app = express();
 // ======================
 
 app.use(
-
-    helmet({
-
-        crossOriginResourcePolicy: false
-
-    })
-
+  helmet({
+    crossOriginResourcePolicy: false,
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: [
+          "'self'",
+          "'unsafe-inline'",
+          "https://app.midtrans.com",
+          "https://snap-assets.midtrans.com",
+          "https://api.midtrans.com",
+          "https://pay.google.com",
+          "https://gwk.gopayapi.com",
+          "https://www.googletagmanager.com",
+          "https://o.alicdn.com",
+          "https://g.alicdn.com",
+        ],
+        frameSrc: [
+          "'self'",
+          "https://app.midtrans.com",
+          "https://snap-assets.midtrans.com",
+        ],
+      },
+    },
+  })
 );
 
 // ======================
