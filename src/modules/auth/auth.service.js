@@ -16,12 +16,10 @@ const register = async ({ email, password }) => {
         );
     }
 
-
     const hashedPassword = await bcrypt.hash(
         password,
         10
     );
-
 
     const user = await User.create({
 
@@ -33,14 +31,21 @@ const register = async ({ email, password }) => {
 
     });
 
+    const token = generateToken(user);
 
     return {
 
-        id: user._id,
+        token,
 
-        email: user.email,
+        user: {
 
-        role: user.role
+            id: user._id,
+
+            email: user.email,
+
+            role: user.role
+
+        }
 
     };
 

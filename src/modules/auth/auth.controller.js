@@ -6,9 +6,18 @@ const register = asyncHandler(async (req, res) => {
 
     const result = await authService.register(req.body);
 
+    res.cookie("token", result.token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
     ApiResponse.success(
         res,
-        result,
+        {
+            user: result.user,
+        },
         "Register success",
         201
     );
@@ -22,9 +31,18 @@ const customerLogin = asyncHandler(async (req, res) => {
         "customer"
     );
 
+    res.cookie("token", result.token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
     ApiResponse.success(
         res,
-        result,
+        {
+            user: result.user,
+        },
         "Login success"
     );
 
