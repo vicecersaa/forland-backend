@@ -5,7 +5,7 @@ import orderService from "../order/order.service.js";
 import ApiError from "../../utils/ApiError.js";
 import updateProductStock from "../../utils/updateProductStock.js";
 import generateOrderNumber from "../../utils/generateOrderNumber.js";
-
+import mongoose from "mongoose";
 
 const createCheckout = async (userId, data) => {
 
