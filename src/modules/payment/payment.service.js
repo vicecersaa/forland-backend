@@ -60,64 +60,26 @@ const createPayment = async (userId, orderId) => {
     // =========================
 
     const parameter = {
-
-
-        transaction_details: {
-
-
-            order_id:
-                order.orderNumber,
-
-
-            gross_amount:
-                order.total
-
-
-        },
-
-
-
-        item_details:
-
-
-            order.items.map(item => ({
-
-
-                id:
-                    item.product.toString(),
-
-
-                price:
-                    item.price,
-
-
-                quantity:
-                    item.quantity,
-
-
-                name:
-                    item.name
-
-
-            })),
-
-
-
-        customer_details: {
-
-
-            first_name:
-                order.shippingAddress.name,
-
-
-            phone:
-                order.shippingAddress.phone
-
-
-        }
-
-
-    };
+    transaction_details: {
+        order_id: order.orderNumber,
+        gross_amount: order.total
+    },
+    item_details: order.items.map(item => ({
+        id: item.product.toString(),
+        price: item.price,
+        quantity: item.quantity,
+        name: item.name
+    })),
+    customer_details: {
+        first_name: order.shippingAddress.name,
+        phone: order.shippingAddress.phone
+    },
+    callbacks: {
+        finish: "https://forlandliving.com/orders",
+        error: "https://forlandliving.com/orders",
+        pending: "https://forlandliving.com/orders"
+    }
+};
 
 
 
