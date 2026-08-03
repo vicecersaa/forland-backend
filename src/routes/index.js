@@ -13,7 +13,7 @@ import bannerPublicRoute from "../modules/banner/banner.public.route.js";
 import productPublicRoute from "../modules/product/product.public.route.js";
 import homepageRoute from "../modules/homepage/homepage.route.js";
 import homepagePublicRoute from "../modules/homepage/homepage.public.route.js";
-
+import garansiPublicRoute from "../modules/garansi/garansi.public.route.js";
 import orderMeRoute from "../modules/order/order.me.route.js";
 import checkoutRoute from "../modules/checkout/checkout.route.js";
 import cartRoute from "../modules/cart/cart.route.js";
@@ -65,6 +65,8 @@ router.use("/admin/warranty", garansiRoute);
 router.use("/admin/homepage", homepageRoute);
 
 router.use("/homepage", homepagePublicRoute);
+
+router.use("/warranty", garansiPublicRoute);
 
 
 export default router;
