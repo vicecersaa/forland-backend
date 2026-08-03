@@ -10,13 +10,13 @@ const uploadToR2 = async (buffer, originalName, mimeType, folder) => {
 
   // Resize kalau gambar
   let finalBuffer = buffer;
-  if (mimeType.startsWith("image/")) {
-    finalBuffer = await sharp(buffer)
-      .resize(1200, 1200, { fit: "inside", withoutEnlargement: true })
-      .jpeg({ quality: 85 })
-      .toBuffer();
-    mimeType = "image/jpeg";
-  }
+if (mimeType.startsWith("image/")) {
+  finalBuffer = await sharp(buffer)
+    .resize(1200, 1200, { fit: "inside" })
+    .jpeg({ quality: 85 })
+    .toBuffer();
+  mimeType = "image/jpeg";
+}
 
   await r2.send(
     new PutObjectCommand({
