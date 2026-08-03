@@ -173,6 +173,13 @@ const orderSchema = new mongoose.Schema({
 
     },
 
+    couponCode: {
+
+        type: String,
+        
+        default: ""
+    },
+
 
     total: {
 

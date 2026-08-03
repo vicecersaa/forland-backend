@@ -6,12 +6,15 @@ import ApiError from "../../utils/ApiError.js";
 import updateProductStock from "../../utils/updateProductStock.js";
 import generateOrderNumber from "../../utils/generateOrderNumber.js";
 import mongoose from "mongoose";
+import couponService from "../coupon/coupon.service.js";
+
 
 const createCheckout = async (userId, data) => {
 
     const {
         shippingAddress,
-        notes = ""
+        notes = "",
+        coupon
     } = data;
 
 
@@ -322,6 +325,22 @@ const createCheckout = async (userId, data) => {
 
     }
 
+    
+    let discount = 0;
+let total = subtotal;
+let couponCode = "";
+
+if (coupon) {
+
+    const result = await couponService.validateCoupon({
+        code: coupon,
+        subtotal
+    });
+
+    discount = result.discount;
+    total = result.total;
+    couponCode = result.coupon;
+}
 
 
     // ======================
@@ -331,10 +350,17 @@ const createCheckout = async (userId, data) => {
 
     const order = await orderService.createOrder({
     orderNumber: generateOrderNumber(),
-    customer: new mongoose.Types.ObjectId(userId), // ← fix ini
+    customer: new mongoose.Types.ObjectId(userId),
     items: orderItems,
+
     subtotal,
-    total: subtotal,
+
+    discount,
+
+    total,
+
+    couponCode,
+
     shippingAddress,
     notes
 });
