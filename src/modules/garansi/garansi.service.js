@@ -4,13 +4,6 @@ import queryBuilder from "../../utils/queryBuilder.js";
 import paginate from "../../utils/paginate.js";
 
 const create = async (payload) => {
-
-    const exists = await Garansi.findOne({ phone: payload.phone });
-
-    if (exists) {
-        throw new ApiError(400, "Nomor HP ini sudah terdaftar sebagai data garansi");
-    }
-
     return await Garansi.create(payload);
 
 };
@@ -55,9 +48,9 @@ const getById = async (id) => {
 
 const getByPhone = async (phone) => {
 
-    const garansi = await Garansi.findOne({ phone });
+    const garansi = await Garansi.find({ phone });
 
-    if (!garansi) {
+    if (garansi.length === 0) {
         throw new ApiError(404, "Data garansi tidak ditemukan untuk nomor ini");
     }
 
