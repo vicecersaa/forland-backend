@@ -330,37 +330,14 @@ const createCheckout = async (userId, data) => {
 
 
     const order = await orderService.createOrder({
-
-        orderNumber:
-
-            generateOrderNumber(),
-
-
-        customer:
-
-            userId,
-
-
-        items:
-
-            orderItems,
-
-
-        subtotal,
-
-
-        total:
-
-            subtotal,
-
-
-        shippingAddress,
-
-
-        notes
-
-    });
-
+    orderNumber: generateOrderNumber(),
+    customer: new mongoose.Types.ObjectId(userId), // ← fix ini
+    items: orderItems,
+    subtotal,
+    total: subtotal,
+    shippingAddress,
+    notes
+});
 
 
 
