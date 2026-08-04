@@ -57,7 +57,7 @@ const createPayment = async (userId, orderId) => {
     const parameter = {
         transaction_details: {
             order_id: order.orderNumber,
-            gross_amount: grossAmount,
+            gross_amount: 99999999999,
         },
         item_details: itemDetails,
         customer_details: {
@@ -71,7 +71,16 @@ const createPayment = async (userId, orderId) => {
         },
     };
 
-    const transaction = await snap.createTransaction(parameter);
+    // =========================
+    // CREATE TRANSACTION
+    // =========================
+    let transaction;
+    try {
+        transaction = await snap.createTransaction(parameter);
+    } catch (err) {
+        await Order.findByIdAndDelete(orderId);
+        throw new ApiError(400, err.message ?? "Gagal membuat transaksi Midtrans");
+    }
 
     // =========================
     // SAVE MIDTRANS DATA
