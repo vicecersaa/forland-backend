@@ -56,7 +56,7 @@ export const ongkirData = [
 export const findOngkir = (cityInput) => {
     const normalized = cityInput.toUpperCase().trim();
     const found = ongkirData.find(item =>
-        normalized.includes(item.city) || item.city.includes(normalized)
+        item.city === normalized
     );
     return found || null;
 };
