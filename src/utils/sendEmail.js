@@ -22,17 +22,14 @@ const sendEmail = async ({
     }
 
 
-    await resend.emails.send({
+    const result = await resend.emails.send({
+    from: process.env.MAIL_FROM,
+    to,
+    subject,
+    html
+});
 
-        from: process.env.MAIL_FROM,
-
-        to,
-
-        subject,
-
-        html
-
-    });
+console.log(result);
 
 
 };
