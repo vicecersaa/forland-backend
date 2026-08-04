@@ -8,7 +8,7 @@ const authMiddleware = async (req, res, next) => {
 
         console.log("Cookie Header:", req.headers.cookie);
         console.log("Cookies:", req.cookies);
-        console.log("Decoded:", decoded);
+        
         const authHeader = req.headers.authorization;
 
         if (authHeader && authHeader.startsWith("Bearer ")) {
