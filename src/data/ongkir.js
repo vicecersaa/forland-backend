@@ -1,72 +1,59 @@
 export const ongkirData = [
-    { city: "BANDUNG KOTA", cost: 200000 },
-    { city: "BANDUNG (KHUSUS)", cost: 612000 },
-    { city: "BAYAH", cost: 840000 },
-    { city: "CIANJUR", cost: 420000 },
-    { city: "CIBADAK", cost: 330000 },
-    { city: "PARAKAN SALAK", cost: 330000 },
-    { city: "CIKAMPEK", cost: 600000 },
-    { city: "CIKANDE", cost: 510000 },
-    { city: "KRESEK", cost: 510000 },
-    { city: "CIKEMBAR", cost: 330000 },
-    { city: "PELABUHAN RATU", cost: 330000 },
-    { city: "CILEGON", cost: 900000 },
-    { city: "CIPANAS", cost: 330000 },
-    { city: "CIREBON", cost: 1170000 },
-    { city: "CILAMAYA", cost: 564000 },
-    { city: "KARAWANG", cost: 444000 },
-    { city: "KUNINGAN", cost: 1188000 },
-    { city: "LEBAK BANTEN", cost: 600000 },
-    { city: "MERAK", cost: 930000 },
-    { city: "PARUNG KUDA", cost: 312000 },
-    { city: "SUKABUMI", cost: 312000 },
-    { city: "CIMELATI", cost: 312000 },
-    { city: "CICURUG", cost: 312000 },
-    { city: "PANDEGLANG", cost: 540000 },
-    { city: "PURWAKARTA", cost: 570000 },
-    { city: "RANGKAS BITUNG", cost: 540000 },
-    { city: "RENGASDEKLOK", cost: 510000 },
-    { city: "SERANG", cost: 492000 },
-    { city: "SUKABUMI KOTA", cost: 360000 },
-    { city: "TUGU", cost: 330000 },
-    { city: "CISARUA", cost: 330000 },
-    { city: "MALIMPING", cost: 1140000 },
-    { city: "CARITA", cost: 1020000 },
-    { city: "LABUAN", cost: 1020000 },
-    { city: "BANTEN LAMA", cost: 540000 },
-    { city: "SUBANG", cost: 750000 },
-    { city: "INDRAMAYU", cost: 750000 },
-    { city: "PATOK BESI", cost: 750000 },
-    { city: "TASIK", cost: 720000 },
-    { city: "SOLO", cost: 780000 },
-    { city: "KEBUMEN", cost: 960000 },
-    { city: "SEMARANG", cost: 360000 },
-    { city: "CIMAHI", cost: 250000 },
-    { city: "PADALARANG", cost: 250000 },
-    { city: "RANCAEKEK", cost: 250000 },
-    { city: "KAB BANDUNG", cost: 300000 },
-    { city: "SUMEDANG", cost: 400000 },
-    { city: "KABUPATEN SUMEDANG", cost: 500000 },
-    { city: "GARUT", cost: 500000 },
-    { city: "KABUPATEN GARUT", cost: 550000 },
-    { city: "JATINANGOR", cost: 600000 },
-    { city: "KAB SUKABUMI", cost: 450000 }
+    { city: "Bandung Kota", cost: 200000 },
+    { city: "Bandung Khusus", cost: 612000 },
+    { city: "Bayah", cost: 840000 },
+    { city: "Cianjur", cost: 420000 },
+    { city: "Cibadak", cost: 330000 },
+    { city: "Parakan Salak", cost: 330000 },
+    { city: "Cikampek", cost: 600000 },
+    { city: "Cikande", cost: 510000 },
+    { city: "Kresek", cost: 510000 },
+    { city: "Cikembar", cost: 330000 },
+    { city: "Pelabuhan Ratu", cost: 330000 },
+    { city: "Cilegon", cost: 900000 },
+    { city: "Cipanas", cost: 330000 },
+    { city: "Cirebon", cost: 1170000 },
+    { city: "Cilamaya", cost: 564000 },
+    { city: "Karawang", cost: 444000 },
+    { city: "Kuningan", cost: 1188000 },
+    { city: "Lebak Banten", cost: 600000 },
+    { city: "Merak", cost: 930000 },
+    { city: "Parung Kuda", cost: 312000 },
+    { city: "Sukabumi", cost: 312000 },
+    { city: "Cimelati", cost: 312000 },
+    { city: "Cicurug", cost: 312000 },
+    { city: "Pandeglang", cost: 540000 },
+    { city: "Purwakarta", cost: 570000 },
+    { city: "Rangkas Bitung", cost: 540000 },
+    { city: "Rengasdeklok", cost: 510000 },
+    { city: "Serang", cost: 492000 },
+    { city: "Sukabumi Kota", cost: 360000 },
+    { city: "Tugu", cost: 330000 },
+    { city: "Cisarua", cost: 330000 },
+    { city: "Malimping", cost: 1140000 },
+    { city: "Carita", cost: 1020000 },
+    { city: "Labuan", cost: 1020000 },
+    { city: "Banten Lama", cost: 540000 },
+    { city: "Subang", cost: 750000 },
+    { city: "Indramayu", cost: 750000 },
+    { city: "Patok Besi", cost: 750000 },
+    { city: "Tasik", cost: 720000 },
+    { city: "Solo", cost: 780000 },
+    { city: "Kebumen", cost: 960000 },
+    { city: "Semarang", cost: 360000 },
+    { city: "Cimahi", cost: 250000 },
+    { city: "Padalarang", cost: 250000 },
+    { city: "Rancaekek", cost: 250000 },
+    { city: "Kab. Bandung", cost: 300000 },
+    { city: "Sumedang", cost: 400000 },
+    { city: "Kab. Sumedang", cost: 500000 },
+    { city: "Garut", cost: 500000 },
+    { city: "Kab. Garut", cost: 550000 },
+    { city: "Jatinangor", cost: 600000 },
+    { city: "Kab. Sukabumi", cost: 450000 }
 ];
 
 export const findOngkir = (cityInput) => {
-    const normalized = cityInput.toUpperCase().trim();
-    
-    // 1. Exact match dulu
-    let found = ongkirData.find(item => item.city === normalized);
-    if (found) return found;
-    
-    // 2. Database contains input (misal input "BANDUNG", db "BANDUNG KOTA")
-    found = ongkirData.find(item => item.city.includes(normalized));
-    if (found) return found;
-
-    // 3. Input contains database (misal input "KOTA BANDUNG", db "BANDUNG")
-    found = ongkirData.find(item => normalized.includes(item.city) && item.city.length >= 5);
-    if (found) return found;
-
-    return null;
+    const found = ongkirData.find(item => item.city === cityInput);
+    return found || null;
 };
