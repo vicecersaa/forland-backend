@@ -55,8 +55,18 @@ export const ongkirData = [
 
 export const findOngkir = (cityInput) => {
     const normalized = cityInput.toUpperCase().trim();
-    const found = ongkirData.find(item =>
-        item.city === normalized
-    );
-    return found || null;
+    
+    // 1. Exact match dulu
+    let found = ongkirData.find(item => item.city === normalized);
+    if (found) return found;
+    
+    // 2. Database contains input (misal input "BANDUNG", db "BANDUNG KOTA")
+    found = ongkirData.find(item => item.city.includes(normalized));
+    if (found) return found;
+
+    // 3. Input contains database (misal input "KOTA BANDUNG", db "BANDUNG")
+    found = ongkirData.find(item => normalized.includes(item.city) && item.city.length >= 5);
+    if (found) return found;
+
+    return null;
 };
