@@ -112,4 +112,21 @@ router.patch(
 
 );
 
+
+
+// Admin routes
+router.patch(
+    "/:id/ongkir",
+    authMiddleware,
+    authorize("admin"),
+    orderController.setOngkir
+);
+
+router.post(
+    "/:id/generate-link",
+    authMiddleware,
+    authorize("admin"),
+    orderController.generateCheckoutLink
+);
+
 export default router;

@@ -8,6 +8,174 @@ import generateOrderNumber from "../../utils/generateOrderNumber.js";
 import queryBuilder from "../../utils/queryBuilder.js";
 import paginate from "../../utils/paginate.js";
 import findDocumentOrThrow from "../../utils/findDocumentOrThrow.js";
+import crypto from "crypto";
+import { findOngkir } from "../../data/ongkir.js";
+
+// Cek ongkir berdasarkan kota
+const checkOngkir = (city) => {
+    const result = findOngkir(city);
+    return result;
+};
+
+// Create order dari guest checkout (kota tidak ketemu)
+const createPendingOngkirOrder = async (payload) => {
+    const session = await mongoose.startSession();
+
+    try {
+        session.startTransaction();
+
+        const items = [];
+        let subtotal = 0;
+
+        for (const item of payload.items) {
+            const product = await Product.findById(item.product).session(session);
+
+            if (!product || !product.isActive) {
+                throw new ApiError(404, "Product not found");
+            }
+
+            let price = product.price;
+            let stock = product.stock;
+            let sku = product.sku;
+            let thumbnail = product.thumbnail || product.images[0] || "";
+            let variantRef = null;
+            let sizeRef = null;
+
+            if (item.variant) {
+                variantRef = product.variants.find(v => v.name === item.variant);
+                if (!variantRef) throw new ApiError(404, "Variant not found");
+                price = variantRef.price;
+                stock = variantRef.stock;
+                sku = variantRef.sku;
+
+                if (item.size) {
+                    sizeRef = variantRef.sizes.find(s => s.name === item.size);
+                    if (!sizeRef) throw new ApiError(404, "Size not found");
+                    price = sizeRef.price;
+                    stock = sizeRef.stock;
+                    sku = sizeRef.sku;
+                }
+            }
+
+            if (stock < item.quantity) {
+                throw new ApiError(400, `${product.name} stock is insufficient`);
+            }
+
+            const itemSubtotal = price * item.quantity;
+            subtotal += itemSubtotal;
+
+            items.push({
+                product: product._id,
+                name: product.name,
+                thumbnail,
+                variant: item.variant || "",
+                size: item.size || "",
+                sku,
+                price,
+                quantity: item.quantity,
+                subtotal: itemSubtotal
+            });
+
+            if (!variantRef) product.stock -= item.quantity;
+            else if (!sizeRef) variantRef.stock -= item.quantity;
+            else sizeRef.stock -= item.quantity;
+
+            await product.save({ session });
+        }
+
+        const order = await Order.create([{
+            orderNumber: generateOrderNumber(),
+            customer: payload.customer || null,
+            items,
+            subtotal,
+            shippingCost: 0,
+            discount: payload.discount ?? 0,
+            total: subtotal - (payload.discount ?? 0),
+            paymentMethod: payload.paymentMethod || "pending",
+            shippingAddress: payload.shippingAddress,
+            notes: payload.notes || "",
+            shippingCostStatus: "pending_ongkir",
+            status: "pending"
+        }], { session });
+
+        await session.commitTransaction();
+        return order[0];
+
+    } catch (error) {
+        await session.abortTransaction();
+        throw error;
+    } finally {
+        session.endSession();
+    }
+};
+
+// Admin set ongkir atau COD
+const setOngkir = async (id, payload) => {
+    const order = await findDocumentOrThrow(Order, id, "Order not found");
+
+    if (payload.isCOD) {
+        order.isCOD = true;
+        order.shippingCost = 0;
+        order.total = order.subtotal - order.discount;
+        order.paymentMethod = "cod";
+    } else {
+        order.shippingCost = payload.shippingCost;
+        order.total = order.subtotal + payload.shippingCost - order.discount;
+        order.isCOD = false;
+    }
+
+    order.shippingCostStatus = "settled";
+    await order.save();
+    return order;
+};
+
+// Admin generate checkout link
+const generateCheckoutLink = async (id, baseUrl) => {
+    const order = await findDocumentOrThrow(Order, id, "Order not found");
+
+    if (order.shippingCostStatus !== "settled") {
+        throw new ApiError(400, "Ongkir belum di-set");
+    }
+
+    const token = crypto.randomBytes(32).toString("hex");
+    const expiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 jam
+
+    order.checkoutToken = token;
+    order.checkoutTokenExpiry = expiry;
+    await order.save();
+
+    const link = `${baseUrl}/checkout?order_id=${order._id}&token=${token}`;
+    return { link, token, expiry };
+};
+
+// Validate checkout token (dipanggil saat user klik link)
+const validateCheckoutToken = async (orderId, token) => {
+    const order = await Order.findById(orderId);
+
+    if (!order) throw new ApiError(404, "Order not found");
+    if (order.checkoutToken !== token) throw new ApiError(401, "Token tidak valid");
+    if (order.checkoutTokenExpiry < new Date()) throw new ApiError(401, "Link sudah expired");
+
+    return order;
+};
+
+// Polling — cek apakah ongkir sudah di-set
+const checkOngkirStatus = async (orderId) => {
+    const order = await Order.findById(orderId).select(
+        "shippingCostStatus shippingCost isCOD total orderNumber"
+    );
+
+    if (!order) throw new ApiError(404, "Order not found");
+
+    return {
+        settled: order.shippingCostStatus === "settled",
+        isCOD: order.isCOD,
+        shippingCost: order.shippingCost,
+        total: order.total,
+        orderNumber: order.orderNumber
+    };
+};
+
 
 const create = async (payload) => {
 
@@ -622,6 +790,18 @@ export default {
 
     updateShippingStatus,
 
-    cancel
+    cancel, 
+
+    checkOngkir,
+
+    createPendingOngkirOrder,
+
+    setOngkir,
+
+    generateCheckoutLink,
+
+    validateCheckoutToken,
+    
+    checkOngkirStatus
 
 };

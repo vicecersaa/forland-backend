@@ -108,6 +108,46 @@ const updatePaymentStatus = asyncHandler(async (req, res) => {
 
 });
 
+const checkOngkir = asyncHandler(async (req, res) => {
+    const { city } = req.query;
+    if (!city) throw new ApiError(400, "City is required");
+
+    const result = orderService.checkOngkir(city);
+
+    if (result) {
+        ApiResponse.success(res, { found: true, ...result }, "Ongkir found");
+    } else {
+        ApiResponse.success(res, { found: false }, "Kota tidak ditemukan di database ongkir");
+    }
+});
+
+const createPendingOngkirOrder = asyncHandler(async (req, res) => {
+    const result = await orderService.createPendingOngkirOrder(req.body);
+    ApiResponse.success(res, result, "Pending ongkir order created", 201);
+});
+
+const setOngkir = asyncHandler(async (req, res) => {
+    const result = await orderService.setOngkir(req.params.id, req.body);
+    ApiResponse.success(res, result, "Ongkir updated successfully");
+});
+
+const generateCheckoutLink = asyncHandler(async (req, res) => {
+    const baseUrl = process.env.FRONTEND_URL || "https://forlandliving.com";
+    const result = await orderService.generateCheckoutLink(req.params.id, baseUrl);
+    ApiResponse.success(res, result, "Checkout link generated");
+});
+
+const validateCheckoutToken = asyncHandler(async (req, res) => {
+    const { order_id, token } = req.query;
+    const result = await orderService.validateCheckoutToken(order_id, token);
+    ApiResponse.success(res, result, "Token valid");
+});
+
+const checkOngkirStatus = asyncHandler(async (req, res) => {
+    const result = await orderService.checkOngkirStatus(req.params.id);
+    ApiResponse.success(res, result, "Ongkir status fetched");
+});
+
 const updateShippingStatus = asyncHandler(async (req, res) => {
 
     const result =
@@ -168,6 +208,19 @@ export default {
 
     updateShippingStatus,
 
-    cancel
+    cancel, 
+
+    checkOngkir,
+
+    createPendingOngkirOrder,
+
+    setOngkir,
+
+    generateCheckoutLink,
+
+    validateCheckoutToken,
+    
+    checkOngkirStatus
+
 
 };

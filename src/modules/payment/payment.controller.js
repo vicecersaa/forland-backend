@@ -32,24 +32,18 @@ const createPayment = asyncHandler(async(req,res)=>{
 
 const callback = asyncHandler(async(req,res)=>{
 
+    console.log("MIDTRANS CALLBACK MASUK");
+    console.log(req.body);
 
     const result = await paymentWebhook.handleNotification(
-
         req.body
-
     );
-
 
     ApiResponse.success(
-
         res,
-
         result,
-
         "Payment callback processed"
-
     );
-
 
 });
 

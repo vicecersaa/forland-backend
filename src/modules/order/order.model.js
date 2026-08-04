@@ -189,13 +189,43 @@ const orderSchema = new mongoose.Schema({
 
     },
 
+    // ======================
+// ONGKIR CUSTOM
+// ======================
+
+shippingCostStatus: {
+    type: String,
+    enum: ["pending_ongkir", "settled", null],
+    default: null
+},
+
+isCOD: {
+    type: Boolean,
+    default: false
+},
+
+checkoutToken: {
+    type: String,
+    default: null
+},
+
+checkoutTokenExpiry: {
+    type: Date,
+    default: null
+},
+
+waNotified: {
+    type: Boolean,
+    default: false
+}
+
 
 
     // ======================
     // ORDER STATUS
     // ======================
 
-    status: {
+    ,status: {
 
         type: String,
 

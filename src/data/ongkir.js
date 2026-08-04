@@ -1,0 +1,62 @@
+export const ongkirData = [
+    { city: "BANDUNG KOTA", cost: 200000 },
+    { city: "BANDUNG (KHUSUS)", cost: 612000 },
+    { city: "BAYAH", cost: 840000 },
+    { city: "CIANJUR", cost: 420000 },
+    { city: "CIBADAK", cost: 330000 },
+    { city: "PARAKAN SALAK", cost: 330000 },
+    { city: "CIKAMPEK", cost: 600000 },
+    { city: "CIKANDE", cost: 510000 },
+    { city: "KRESEK", cost: 510000 },
+    { city: "CIKEMBAR", cost: 330000 },
+    { city: "PELABUHAN RATU", cost: 330000 },
+    { city: "CILEGON", cost: 900000 },
+    { city: "CIPANAS", cost: 330000 },
+    { city: "CIREBON", cost: 1170000 },
+    { city: "CILAMAYA", cost: 564000 },
+    { city: "KARAWANG", cost: 444000 },
+    { city: "KUNINGAN", cost: 1188000 },
+    { city: "LEBAK BANTEN", cost: 600000 },
+    { city: "MERAK", cost: 930000 },
+    { city: "PARUNG KUDA", cost: 312000 },
+    { city: "SUKABUMI", cost: 312000 },
+    { city: "CIMELATI", cost: 312000 },
+    { city: "CICURUG", cost: 312000 },
+    { city: "PANDEGLANG", cost: 540000 },
+    { city: "PURWAKARTA", cost: 570000 },
+    { city: "RANGKAS BITUNG", cost: 540000 },
+    { city: "RENGASDEKLOK", cost: 510000 },
+    { city: "SERANG", cost: 492000 },
+    { city: "SUKABUMI KOTA", cost: 360000 },
+    { city: "TUGU", cost: 330000 },
+    { city: "CISARUA", cost: 330000 },
+    { city: "MALIMPING", cost: 1140000 },
+    { city: "CARITA", cost: 1020000 },
+    { city: "LABUAN", cost: 1020000 },
+    { city: "BANTEN LAMA", cost: 540000 },
+    { city: "SUBANG", cost: 750000 },
+    { city: "INDRAMAYU", cost: 750000 },
+    { city: "PATOK BESI", cost: 750000 },
+    { city: "TASIK", cost: 720000 },
+    { city: "SOLO", cost: 780000 },
+    { city: "KEBUMEN", cost: 960000 },
+    { city: "SEMARANG", cost: 360000 },
+    { city: "CIMAHI", cost: 250000 },
+    { city: "PADALARANG", cost: 250000 },
+    { city: "RANCAEKEK", cost: 250000 },
+    { city: "KAB BANDUNG", cost: 300000 },
+    { city: "SUMEDANG", cost: 400000 },
+    { city: "KABUPATEN SUMEDANG", cost: 500000 },
+    { city: "GARUT", cost: 500000 },
+    { city: "KABUPATEN GARUT", cost: 550000 },
+    { city: "JATINANGOR", cost: 600000 },
+    { city: "KAB SUKABUMI", cost: 450000 }
+];
+
+export const findOngkir = (cityInput) => {
+    const normalized = cityInput.toUpperCase().trim();
+    const found = ongkirData.find(item =>
+        normalized.includes(item.city) || item.city.includes(normalized)
+    );
+    return found || null;
+};
