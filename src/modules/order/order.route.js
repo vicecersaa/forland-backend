@@ -20,6 +20,45 @@ import {
 
 const router = Router();
 
+// Public routes (no auth)
+router.get(
+    "/check-ongkir",
+    orderController.checkOngkir
+);
+
+router.post(
+    "/pending-ongkir",
+    orderController.createPendingOngkirOrder
+);
+
+router.get(
+    "/validate-token",
+    orderController.validateCheckoutToken
+);
+
+// Polling (no auth — pakai order ID)
+router.get(
+    "/:id/ongkir-status",
+    orderController.checkOngkirStatus
+);
+
+
+
+// Admin routes
+router.patch(
+    "/:id/ongkir",
+    authMiddleware,
+    authorize("admin"),
+    orderController.setOngkir
+);
+
+router.post(
+    "/:id/generate-link",
+    authMiddleware,
+    authorize("admin"),
+    orderController.generateCheckoutLink
+);
+
 router.post(
 
     "/",
@@ -112,43 +151,6 @@ router.patch(
 
 );
 
-// Public routes (no auth)
-router.get(
-    "/check-ongkir",
-    orderController.checkOngkir
-);
 
-router.post(
-    "/pending-ongkir",
-    orderController.createPendingOngkirOrder
-);
-
-router.get(
-    "/validate-token",
-    orderController.validateCheckoutToken
-);
-
-// Polling (no auth — pakai order ID)
-router.get(
-    "/:id/ongkir-status",
-    orderController.checkOngkirStatus
-);
-
-
-
-// Admin routes
-router.patch(
-    "/:id/ongkir",
-    authMiddleware,
-    authorize("admin"),
-    orderController.setOngkir
-);
-
-router.post(
-    "/:id/generate-link",
-    authMiddleware,
-    authorize("admin"),
-    orderController.generateCheckoutLink
-);
 
 export default router;
