@@ -57,7 +57,7 @@ const createPayment = async (userId, orderId) => {
     const parameter = {
         transaction_details: {
             order_id: order.orderNumber,
-            gross_amount: 99999999999,
+            gross_amount: grossAmount,
         },
         item_details: itemDetails,
         customer_details: {
