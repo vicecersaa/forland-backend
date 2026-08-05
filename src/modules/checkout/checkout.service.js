@@ -352,19 +352,14 @@ if (coupon) {
     orderNumber: generateOrderNumber(),
     customer: new mongoose.Types.ObjectId(userId),
     items: orderItems,
-
     subtotal,
-
+    shippingCost: data.shippingCost ?? 0,  // ← tambahin ini
     discount,
-
-    total,
-
+    total: total + (data.shippingCost ?? 0),  // ← update total juga
     couponCode,
-
     shippingAddress,
     notes
 });
-
 
 
 
