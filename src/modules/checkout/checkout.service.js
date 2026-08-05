@@ -346,6 +346,7 @@ if (coupon) {
     // ======================
     // CREATE ORDER
     // ======================
+    const shippingCost = data.shippingCost ?? 0;
 
 
     const order = await orderService.createOrder({
@@ -353,9 +354,9 @@ if (coupon) {
     customer: new mongoose.Types.ObjectId(userId),
     items: orderItems,
     subtotal,
-    shippingCost: data.shippingCost ?? 0,  // ← tambahin ini
+    shippingCost,
     discount,
-    total: total + (data.shippingCost ?? 0),  // ← update total juga
+    total: (subtotal - discount) + shippingCost,
     couponCode,
     shippingAddress,
     notes

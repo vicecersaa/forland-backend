@@ -23,33 +23,33 @@ const createPayment = async (userId, orderId) => {
     // BUILD ITEM DETAILS
     // =========================
     const itemDetails = order.items.map(item => ({
-        id: item.product.toString(),
-        price: Math.round(item.price),
-        quantity: item.quantity,
-        name: item.name.substring(0, 50),
-    }));
+    id: item.product.toString(),
+    price: Math.round(item.price),
+    quantity: item.quantity,
+    name: item.name.substring(0, 50),
+}));
 
-    if (order.tax > 0) {
-        itemDetails.push({
-            id: "TAX",
-            price: Math.round(order.tax),
-            quantity: 1,
-            name: "PPN 11%",
-        });
-    }
+if (order.shippingCost > 0) {
+    itemDetails.push({
+        id: "SHIPPING",
+        price: Math.round(order.shippingCost),
+        quantity: 1,
+        name: "Ongkos Kirim",
+    });
+}
 
-    if (order.discount > 0) {
-        itemDetails.push({
-            id: "DISCOUNT",
-            price: -Math.round(order.discount),
-            quantity: 1,
-            name: "Diskon Voucher",
-        });
-    }
+if (order.discount > 0) {
+    itemDetails.push({
+        id: "DISCOUNT",
+        price: -Math.round(order.discount),
+        quantity: 1,
+        name: "Diskon Voucher",
+    });
+}
 
-    const grossAmount = itemDetails.reduce(
-        (sum, item) => sum + item.price * item.quantity, 0
-    );
+const grossAmount = itemDetails.reduce(
+    (sum, item) => sum + item.price * item.quantity, 0
+);
 
     // =========================
     // MIDTRANS PARAMETER
