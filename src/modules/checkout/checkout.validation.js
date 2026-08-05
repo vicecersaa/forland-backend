@@ -24,6 +24,14 @@ export const createCheckoutSchema = z.object({
 
     shippingAddress: shippingAddressSchema,
 
+    shippingCost: z.number()
+        .min(0)
+        .default(0),
+
+    coupon: z.string()
+        .optional()
+        .default(""),
+
     notes: z.string()
         .optional()
         .default("")
