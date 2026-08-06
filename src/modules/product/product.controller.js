@@ -11,19 +11,15 @@ import deleteFromR2 from "../../utils/deleteFromR2.js";
 const uploadFilesToR2 = async (files = {}) => {
 
     const uploaded = {
-
         images: [],
         imageKeys: [],
 
+        variantImages: [],
+        
         video: "",
         videoKey: null
-
     };
 
-
-    // =====================
-    // IMAGES
-    // =====================
 
     if (files.images) {
 
@@ -37,30 +33,42 @@ const uploadFilesToR2 = async (files = {}) => {
                     "products/images"
                 );
 
+            uploaded.images.push(result.url);
+            uploaded.imageKeys.push(result.key);
+        }
+    }
 
-            uploaded.images.push(
-                result.url
-            );
+
+    // =====================
+    // VARIANT IMAGES
+    // =====================
+
+    if (files.variantImages) {
+
+        for (const file of files.variantImages) {
+
+            const result =
+                await uploadToR2(
+                    file.buffer,
+                    file.originalname,
+                    file.mimetype,
+                    "products/variants"
+                );
 
 
-            uploaded.imageKeys.push(
-                result.key
-            );
+            uploaded.variantImages.push({
+                url: result.url,
+                key: result.key
+            });
 
         }
 
     }
 
 
-    // =====================
-    // VIDEO
-    // =====================
-
     if (files.video?.[0]) {
 
-        const file =
-            files.video[0];
-
+        const file = files.video[0];
 
         const result =
             await uploadToR2(
@@ -71,18 +79,13 @@ const uploadFilesToR2 = async (files = {}) => {
             );
 
 
-        uploaded.video =
-            result.url;
-
-
-        uploaded.videoKey =
-            result.key;
+        uploaded.video = result.url;
+        uploaded.videoKey = result.key;
 
     }
 
 
     return uploaded;
-
 };
 
 
@@ -107,18 +110,47 @@ const create = asyncHandler(async (req,res)=>{
 
 
 
-        const result =
-            await productService.create({
+        let variants = [];
 
-                ...req.body,
+if (req.body.variants) {
 
-                images:
-                    uploaded.images,
+    variants = JSON.parse(req.body.variants);
 
-                video:
-                    uploaded.video
+}
 
-            });
+
+variants = variants.map((variant, index)=>{
+
+    const image =
+        uploaded.variantImages[index];
+
+
+    return {
+
+        ...variant,
+
+        image: image?.url || "",
+        imageKey: image?.key || ""
+
+    };
+
+});
+
+
+const result =
+    await productService.create({
+
+        ...req.body,
+
+        variants,
+
+        images:
+            uploaded.images,
+
+        video:
+            uploaded.video
+
+    });
 
 
 
