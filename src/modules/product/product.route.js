@@ -74,7 +74,6 @@ router.get(
 );
 
 router.put(
-
     "/:id",
 
     authMiddleware,
@@ -113,6 +112,7 @@ router.put(
     productController.update
 
 );
+
 router.post(
     "/:id/variants/:variantIndex/image",
     authMiddleware,

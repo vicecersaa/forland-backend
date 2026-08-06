@@ -342,7 +342,6 @@ const getPublicBySlug = asyncHandler(async(req,res)=>{
 
 
 
-
 // =====================
 // UPDATE
 // =====================
