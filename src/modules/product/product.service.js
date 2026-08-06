@@ -626,6 +626,17 @@ const update = async (id, payload) => {
 
         }
 
+        if (Array.isArray(payload.variants) && Array.isArray(product.variants)) {
+    payload.variants = payload.variants.map((v, i) => {
+        const existing = product.variants[i];
+        return {
+            ...v,
+            image: v.image || existing?.image || '',
+            imageKey: v.imageKey || existing?.imageKey || '',
+        };
+    });
+}
+
         // ==========================
         // Assign
         // ==========================
