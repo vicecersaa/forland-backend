@@ -463,6 +463,13 @@ const getPublicBySlug = async (slug) => {
 };
 
 const setVariantImage = async (productId, variantIndex, imageUrl, imageKey) => {
+   
+   console.log("SET VARIANT IMAGE:", {
+        productId,
+        variantIndex,
+        imageUrl,
+        imageKey
+    });
     const product = await findDocumentOrThrow(Product, productId, "Product not found");
 
     if (variantIndex < 0 || variantIndex >= product.variants.length) {
