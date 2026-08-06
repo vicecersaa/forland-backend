@@ -585,16 +585,10 @@ const update = async (id, payload) => {
         // ==========================
 
         if (payload.category) {
-
-            const category =
-                await findOrCreateCategory(
-                    payload.category
-                );
-
-            payload.category =
-                category._id;
-
-        }
+    const category = await Category.findById(payload.category);
+    if (!category) throw new ApiError(404, "Category not found");
+    payload.category = category._id;
+}
 
         // ==========================
         // Images
