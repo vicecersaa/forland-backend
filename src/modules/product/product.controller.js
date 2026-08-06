@@ -6,6 +6,7 @@ import ApiResponse from "../../utils/ApiResponse.js";
 import deleteUploadedFiles from "../../utils/deleteUploadedFiles.js";
 import uploadToR2 from "../../utils/uploadToR2.js";
 import deleteFromR2 from "../../utils/deleteFromR2.js";
+import ApiError from "../../utils/ApiError.js";
 
 
 const uploadFilesToR2 = async (files = {}) => {
@@ -348,7 +349,6 @@ const getPublicBySlug = asyncHandler(async(req,res)=>{
 
 const update = asyncHandler(async(req,res)=>{
 
-
     try {
 
 
@@ -358,42 +358,77 @@ const update = asyncHandler(async(req,res)=>{
             );
 
 
-        let variants = [];
+        let updateData = {
+            ...req.body
+        };
 
-        if (req.body.variants) {
 
-            variants =
+        // =====================
+        // VARIANTS
+        // =====================
+
+        if(req.body.variants){
+
+            let variants =
                 JSON.parse(req.body.variants);
+
+
+            variants = variants.map((variant,index)=>{
+
+
+                const image =
+                    uploaded.variantImages[index];
+
+
+                return {
+
+                    ...variant,
+
+                    image:
+                        image?.url ??
+                        variant.image ??
+                        "",
+
+
+                    imageKey:
+                        image?.key ??
+                        variant.imageKey ??
+                        ""
+
+                };
+
+            });
+
+
+            updateData.variants = variants;
 
         }
 
 
-        variants = variants.map((variant,index)=>{
+
+        // =====================
+        // PRODUCT IMAGES
+        // =====================
+
+        if(uploaded.images.length > 0){
+
+            updateData.images =
+                uploaded.images;
+
+        }
 
 
-            const image =
-                uploaded.variantImages[index];
 
+        // =====================
+        // VIDEO
+        // =====================
 
-            return {
+        if(uploaded.video){
 
-                ...variant,
+            updateData.video =
+                uploaded.video;
 
-                image:
-                    image?.url ||
-                    variant.image ||
-                    "",
-
-
-                imageKey:
-                    image?.key ||
-                    variant.imageKey ||
-                    ""
-
-            };
-
-
-        });
+        }
 
 
 
@@ -402,31 +437,7 @@ const update = asyncHandler(async(req,res)=>{
 
                 req.params.id,
 
-                {
-
-                    ...req.body,
-
-
-                    variants,
-
-
-                    ...(uploaded.images.length > 0 && {
-
-                        images:
-                            uploaded.images
-
-                    }),
-
-
-
-                    ...(uploaded.video && {
-
-                        video:
-                            uploaded.video
-
-                    })
-
-                }
+                updateData
 
             );
 
@@ -455,7 +466,6 @@ const update = asyncHandler(async(req,res)=>{
 
 
     }
-
 
 });
 
