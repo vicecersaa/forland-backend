@@ -84,27 +84,24 @@ router.put(
     upload([
 
         {
-
             field: "images",
-
             folder: "products/images",
-
             maxCount: 10,
-
             type: "image"
-
         },
 
         {
+            field: "variantImages",
+            folder: "products/variants",
+            maxCount: 20,
+            type: "image"
+        },
 
+        {
             field: "video",
-
             folder: "products/videos",
-
             maxCount: 1,
-
             type: "video"
-
         }
 
     ]),
@@ -116,7 +113,6 @@ router.put(
     productController.update
 
 );
-
 router.post(
     "/:id/variants/:variantIndex/image",
     authMiddleware,
