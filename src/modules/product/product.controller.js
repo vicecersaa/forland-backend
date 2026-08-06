@@ -373,31 +373,40 @@ const update = asyncHandler(async(req,res)=>{
                 JSON.parse(req.body.variants);
 
 
-            variants = variants.map((variant,index)=>{
+            let imageIndex = 0;
+
+variants = variants.map((variant)=>{
+
+    let image = null;
 
 
-                const image =
-                    uploaded.variantImages[index];
+    if (uploaded.variantImages[imageIndex]) {
+
+        image = uploaded.variantImages[imageIndex];
+
+        imageIndex++;
+
+    }
 
 
-                return {
+    return {
 
-                    ...variant,
+        ...variant,
 
-                    image:
-                        image?.url ??
-                        variant.image ??
-                        "",
+        image:
+            image?.url ||
+            variant.image ||
+            "",
 
 
-                    imageKey:
-                        image?.key ??
-                        variant.imageKey ??
-                        ""
+        imageKey:
+            image?.key ||
+            variant.imageKey ||
+            ""
 
-                };
+    };
 
-            });
+});
 
 
             updateData.variants = variants;
