@@ -359,6 +359,44 @@ const update = asyncHandler(async(req,res)=>{
             );
 
 
+        let variants = [];
+
+        if (req.body.variants) {
+
+            variants =
+                JSON.parse(req.body.variants);
+
+        }
+
+
+        variants = variants.map((variant,index)=>{
+
+
+            const image =
+                uploaded.variantImages[index];
+
+
+            return {
+
+                ...variant,
+
+                image:
+                    image?.url ||
+                    variant.image ||
+                    "",
+
+
+                imageKey:
+                    image?.key ||
+                    variant.imageKey ||
+                    ""
+
+            };
+
+
+        });
+
+
 
         const result =
             await productService.update(
@@ -368,6 +406,9 @@ const update = asyncHandler(async(req,res)=>{
                 {
 
                     ...req.body,
+
+
+                    variants,
 
 
                     ...(uploaded.images.length > 0 && {
