@@ -114,9 +114,9 @@ const create = asyncHandler(async (req,res)=>{
         let variants = [];
 
 if (req.body.variants) {
-
-    variants = JSON.parse(req.body.variants);
-
+    variants = Array.isArray(req.body.variants) 
+        ? req.body.variants 
+        : JSON.parse(req.body.variants);
 }
 
 
@@ -369,8 +369,9 @@ const update = asyncHandler(async(req,res)=>{
 
         if(req.body.variants){
 
-            let variants =
-                JSON.parse(req.body.variants);
+            let variants = Array.isArray(req.body.variants) 
+    ? req.body.variants 
+    : JSON.parse(req.body.variants);
 
 
             let imageIndex = 0;
