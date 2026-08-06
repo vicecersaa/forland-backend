@@ -111,7 +111,7 @@ const findOrCreateCategory = async (categoryName) => {
 };
 
 const create = async (payload) => {
-
+    console.log("CREATE PAYLOAD:", JSON.stringify(payload, null, 2));
     const exists = await Product.findOne({
 
         name: payload.name
