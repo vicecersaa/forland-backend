@@ -224,6 +224,37 @@ const getById = asyncHandler(async(req,res)=>{
 
 });
 
+const setVariantImage = asyncHandler(async (req, res) => {
+    const image = req.files?.images?.[0];
+
+    if (!image) throw new ApiError(400, "Image is required");
+
+    const uploaded = await uploadToR2(
+        image.buffer,
+        image.originalname,
+        image.mimetype,
+        "products/variants"
+    );
+
+    const result = await productService.setVariantImage(
+        req.params.id,
+        Number(req.params.variantIndex),
+        uploaded.url,
+        uploaded.key
+    );
+
+    ApiResponse.success(res, result, "Variant image updated successfully");
+});
+
+const removeVariantImage = asyncHandler(async (req, res) => {
+    const result = await productService.removeVariantImage(
+        req.params.id,
+        Number(req.params.variantIndex)
+    );
+
+    ApiResponse.success(res, result, "Variant image deleted successfully");
+});
+
 
 
 
@@ -712,7 +743,11 @@ export default {
 
     getPublic,
 
-    getPublicBySlug
+    getPublicBySlug,
+
+    setVariantImage,
+    
+    removeVariantImage,
 
 
 };

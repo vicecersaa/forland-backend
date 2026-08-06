@@ -117,6 +117,28 @@ router.put(
 
 );
 
+router.post(
+    "/:id/variants/:variantIndex/image",
+    authMiddleware,
+    authorize("admin"),
+    upload([
+        {
+            field: "images",
+            folder: "products/variants",
+            maxCount: 1,
+            type: "image"
+        }
+    ]),
+    productController.setVariantImage
+);
+
+router.delete(
+    "/:id/variants/:variantIndex/image",
+    authMiddleware,
+    authorize("admin"),
+    productController.removeVariantImage
+);
+
 router.patch(
 
     "/:id/images/reorder",

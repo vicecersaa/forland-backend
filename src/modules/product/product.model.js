@@ -67,75 +67,19 @@ const sizeSchema = new mongoose.Schema(
 );
 
 const variantSchema = new mongoose.Schema(
-
     {
+        name: { type: String, required: true, trim: true },
+        sku: { type: String, trim: true, uppercase: true, default: "" },
+        price: { type: Number, default: null, min: 0 },
+        stock: { type: Number, default: null, min: 0 },
+        sizes: { type: [sizeSchema], default: [] },
+        isActive: { type: Boolean, default: true },
 
-        name: {
-
-            type: String,
-
-            required: true,
-
-            trim: true
-
-        },
-
-        sku: {
-
-            type: String,
-
-            trim: true,
-
-            uppercase: true,
-
-            default: ""
-
-        },
-
-        price: {
-
-            type: Number,
-
-            default: null,
-
-            min: 0
-
-        },
-
-        stock: {
-
-            type: Number,
-
-            default: null,
-
-            min: 0
-
-        },
-
-        sizes: {
-
-            type: [sizeSchema],
-
-            default: []
-
-        },
-
-        isActive: {
-
-            type: Boolean,
-
-            default: true
-
-        }
-
+        // TAMBAH INI
+        image: { type: String, default: "" },
+        imageKey: { type: String, default: "" }
     },
-
-    {
-
-        _id: false
-
-    }
-
+    { _id: false }
 );
 
 const productSchema = new mongoose.Schema(

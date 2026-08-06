@@ -462,6 +462,49 @@ const getPublicBySlug = async (slug) => {
 
 };
 
+const setVariantImage = async (productId, variantIndex, imageUrl, imageKey) => {
+    const product = await findDocumentOrThrow(Product, productId, "Product not found");
+
+    if (variantIndex < 0 || variantIndex >= product.variants.length) {
+        throw new ApiError(404, "Variant not found");
+    }
+
+    const variant = product.variants[variantIndex];
+    const oldKey = variant.imageKey;
+
+    variant.image = imageUrl;
+    variant.imageKey = imageKey;
+
+    await product.save();
+
+    if (oldKey) await deleteFromR2(oldKey);
+
+    return product;
+};
+
+const removeVariantImage = async (productId, variantIndex) => {
+    const product = await findDocumentOrThrow(Product, productId, "Product not found");
+
+    if (variantIndex < 0 || variantIndex >= product.variants.length) {
+        throw new ApiError(404, "Variant not found");
+    }
+
+    const variant = product.variants[variantIndex];
+
+    if (!variant.image) throw new ApiError(404, "Variant image not found");
+
+    const oldKey = variant.imageKey;
+
+    variant.image = "";
+    variant.imageKey = "";
+
+    await product.save();
+
+    if (oldKey) await deleteFromR2(oldKey);
+
+    return product;
+};
+
 const getById = async (id) => {
 
     return await findDocumentOrThrow(
@@ -1131,6 +1174,10 @@ export default {
 
     getPublic,
 
-    getPublicBySlug
+    getPublicBySlug,
+
+    setVariantImage,
+    
+    removeVariantImage
 
 };
