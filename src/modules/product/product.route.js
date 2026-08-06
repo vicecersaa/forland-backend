@@ -16,47 +16,17 @@ import {
 const router = Router();
 
 router.post(
-
     "/",
-
     authMiddleware,
-
     authorize("admin"),
-
     upload([
-
-        {
-
-            field: "images",
-
-            folder: "products/images",
-
-            maxCount: 10,
-
-            type: "image"
-
-        },
-
-        {
-
-            field: "video",
-
-            folder: "products/videos",
-
-            maxCount: 1,
-
-            type: "video"
-
-        }
-
+        { field: "images", folder: "products/images", maxCount: 10, type: "image" },
+        { field: "variantImages", folder: "products/variants", maxCount: 20, type: "image" }, // tambah ini
+        { field: "video", folder: "products/videos", maxCount: 1, type: "video" }
     ]),
-
     parseFormData,
-
     validate(createProductSchema),
-
     productController.create
-
 );
 
 router.get(
