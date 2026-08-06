@@ -203,12 +203,7 @@ const getAll = async (query) => {
 
         filter.isActive = query.isActive === "true";
 
-    } else {
-
-        // Default hanya tampilkan produk aktif
-        filter.isActive = true;
-
-    }
+    } 
 
     const totalItems =
         await Product.countDocuments(filter);
