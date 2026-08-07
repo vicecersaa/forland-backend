@@ -6,7 +6,7 @@ const parseFormData = (req, res, next) => {
 
             if (typeof value !== "string") {
 
-                return value;
+                return value;3
 
             }
 
@@ -65,9 +65,13 @@ const parseFormData = (req, res, next) => {
 
         Object.keys(req.body).forEach((key) => {
 
-            req.body[key] = parseValue(req.body[key]);
+    req.body[key] = parseValue(req.body[key]);
 
-        });
+    if (key === 'category') {
+        console.log('CATEGORY AFTER PARSE:', req.body[key], typeof req.body[key]);
+    }
+
+});
 
         next();
 

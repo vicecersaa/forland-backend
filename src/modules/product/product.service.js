@@ -526,6 +526,8 @@ const getById = async (id) => {
 
 const update = async (id, payload) => {
 
+    console.log('CATEGORY PAYLOAD:', payload.category, typeof payload.category);
+
     const product = await findDocumentOrThrow(
 
         Product,
