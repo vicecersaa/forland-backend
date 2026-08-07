@@ -71,4 +71,6 @@ router.use("/warranty", garansiPublicRoute);
 
 router.use("/orders", orderPublicRoute);
 
+router.use("/coupons", couponPublicRoute);
+
 export default router;
