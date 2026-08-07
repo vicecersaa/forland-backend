@@ -35,6 +35,8 @@ router.post(
     couponController.validateCoupon
 );
 
+router.get("/popup", couponController.getPopup);
+
 router.get(
     "/:id",
     authMiddleware,

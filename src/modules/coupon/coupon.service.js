@@ -73,6 +73,24 @@ const getAll = async (query) => {
 
 };
 
+const getPopup = async () => {
+  const now = new Date();
+  const coupon = await Coupon.findOne({
+    isActive: true,
+    isPopup: true,
+    startDate: { $lte: now },
+    endDate: { $gte: now },
+  });
+
+  if (!coupon) return null;
+
+  return {
+    code: coupon.code,
+    discount: coupon.value,
+    label: coupon.label || "",
+  };
+};
+
 const getById = async (id) => {
 
     const coupon = await Coupon.findById(id);

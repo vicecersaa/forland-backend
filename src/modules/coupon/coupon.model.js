@@ -46,6 +46,16 @@ const couponSchema = new mongoose.Schema(
             default: 0
         },
 
+        isPopup: {
+            type: Boolean,
+            default: false
+        },
+
+        label: {
+            type: String,
+            default: ""
+        },
+
         usagePerUser: {
             type: Number,
             default: 1

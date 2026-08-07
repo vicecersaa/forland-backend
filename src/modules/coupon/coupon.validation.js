@@ -21,6 +21,10 @@ export const createCouponSchema = z.object({
 
     usagePerUser: z.coerce.number().default(1),
 
+    isPopup: z.boolean().optional().default(false),
+    
+    label: z.string().optional().default(""),
+
     startDate: z.coerce.date(),
 
     endDate: z.coerce.date(),

@@ -37,6 +37,11 @@ const getAll = asyncHandler(async (req, res) => {
 
 });
 
+const getPopup = asyncHandler(async (req, res) => {
+  const result = await couponService.getPopup();
+  ApiResponse.success(res, result, "Popup coupon fetched successfully");
+});
+
 const getById = asyncHandler(async (req, res) => {
 
     const result = await couponService.getById(req.params.id);
