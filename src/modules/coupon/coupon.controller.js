@@ -124,6 +124,8 @@ export default {
 
     validateCoupon,
 
-    remove
+    remove,
+
+    getPopup
 
 };
