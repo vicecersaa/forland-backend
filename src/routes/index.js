@@ -20,6 +20,7 @@ import cartRoute from "../modules/cart/cart.route.js";
 import paymentRoute from "../modules/payment/payment.route.js";
 import garansiRoute from "../modules/garansi/garansi.route.js";
 import orderPublicRoute from "../modules/order/order.public.route.js";
+import couponPublicRoute from "../modules/coupon/coupon.public.route.js";
 
 
 const router = Router();
