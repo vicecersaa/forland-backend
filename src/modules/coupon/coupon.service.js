@@ -3,6 +3,13 @@ import ApiError from "../../utils/ApiError.js";
 import queryBuilder from "../../utils/queryBuilder.js";
 import paginate from "../../utils/paginate.js";
 
+// Pastikan hanya satu kupon yang jadi popup — unset semua kecuali excludeId
+const unsetOtherPopups = async (excludeId = null) => {
+    const filter = { isPopup: true };
+    if (excludeId) filter._id = { $ne: excludeId };
+    await Coupon.updateMany(filter, { $set: { isPopup: false } });
+};
+
 const create = async (payload) => {
 
     const exists = await Coupon.findOne({
@@ -14,6 +21,11 @@ const create = async (payload) => {
     }
 
     payload.code = payload.code.toUpperCase();
+
+    // Kalau kupon baru ini dijadikan popup, nonaktifkan popup lain dulu
+    if (payload.isPopup) {
+        await unsetOtherPopups();
+    }
 
     return await Coupon.create(payload);
 
@@ -155,6 +167,11 @@ const update = async (id, payload) => {
 
         }
 
+    }
+
+    // Kalau kupon ini dijadikan popup, nonaktifkan popup kupon lain dulu
+    if (payload.isPopup) {
+        await unsetOtherPopups(id);
     }
 
     Object.assign(
@@ -338,4 +355,5 @@ export default {
     remove,
 
     getPopup
+
 };
